@@ -1,7 +1,6 @@
-/* const regl = require("regl")();
-const d3 = require("d3"); */
-/* import * as UTILS from "./js"; */
-/* require("/js"); */
+const REGL = require("regl")();
+const d3 = require("d3"); 
+
 
 const defaultOptions = {
   csvUrl: null, // URL to csv file containing the points [x,y,indicator]
