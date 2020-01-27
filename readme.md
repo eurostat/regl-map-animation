@@ -1,6 +1,8 @@
 # regl-map-animation
 
-### A javascript library which uses WebGL for visualizing huge amounts of point data derived from grid-based statistics.
+Experimental.
+
+A javascript library which uses WebGL for visualizing huge amounts of point data derived from grid-based statistics.
 
 Point data is in csv format and EPSG 3035 projection.
 
