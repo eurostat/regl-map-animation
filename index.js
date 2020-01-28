@@ -448,7 +448,6 @@ toVectorColor = colorStr => {
 };
 // add classification value and color properties to each GLpoint using values from csv
 classifyPoint = (glPoint, csvPoint, colors, stops) => {
-
   for (i = 0; i < stops.length; i++) {
     let stop = stops[i];
     if (i == stops.length - 1) {

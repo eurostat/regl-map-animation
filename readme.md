@@ -1,10 +1,6 @@
 # regl-map-animation
 
-Experimental.
-
-A javascript library which uses WebGL for visualizing huge amounts of point data derived from grid-based statistics.
-
-Point data is in csv format and EPSG 3035 projection.
+Animate x/y point data loaded from CSV files and categorize them for vizualization. Point data in the csv file should be defined as x,y,value.
 
 # Installation
 
@@ -16,8 +12,12 @@ Point data is in csv format and EPSG 3035 projection.
 import mapAnimation from "regl-map-animation";
 
 mapAnimation({
-  csvURL: "my/csv/url",
-  point_size: 5
+  csvURL: "./assets/pop_5km.csv", // xmin,ymin,population for a 5km population grid of Europe in EPSG 3035
+  pointWidth: 1,
+  pointMargin: 1,
+  delayAtEnd: 1,
+  colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
+  stops: [0, 100, 1000, 5000, 10000, 30000]
 });
 ```
 
@@ -32,8 +32,8 @@ mapAnimation({
 - **numPoints** _number_, (number of points to display. Defaults to the number of points in the csv file)
 - **pointWidth** _number_, (width of each point. Defaults to 1)
 - **pointMargin**: _number_, (Margin applied to the bars in the bar chart. Defaults to 1)
-- **duration**: _number_, (The duration of each transition animation in seconds. Defaults to 5000)
-- **delayAtEnd**: _number_, (How long to stay at a final frame before animating again (in seconds). Defaults to 0)
+- **duration**: _number_, (The duration of each transition animation in milliseconds. Defaults to 5000)
+- **delayAtEnd**: _number_, (How long to stay at a final frame before animating again (in milliseconds). Defaults to 0)
 - **screenWidth**: _number_, (Defaults to window.innerWidth)
 - **screenHeight**: _number_, (Defaults to window.innerHeight)
 - **stops**: _array_, (Stops used for categorizing points by their "value" attribute. Defaults to [0, 100, 1000, 5000, 10000] ),
