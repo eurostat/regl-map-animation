@@ -2,11 +2,13 @@
 
 Animate x/y point data loaded from CSV files using [regl](https://github.com/regl-project/regl) and categorize them for vizualization. Point data in the csv file should be defined as x,y,value - with "value" being the numerical value with which the points will be categorized.
 
-# Installation & Usage
+![alt text](https://github.com/eurostat/regl-map-animation/blob/master/preview.png)
+
+## Installation & Usage
 
 The project is built using UMD so it works both in browsers and in node.js
 
-## Node
+### Node
 
 Within a node.js project simply run the following command:
 
@@ -27,7 +29,7 @@ mapAnimation({
 });
 ```
 
-## Browsers
+### Browsers
 
 As a standalone script use:
 
@@ -48,7 +50,7 @@ mapAnimation({
 });
 ```
 
-# Parameters
+## Parameters
 
 ### Required:
 
@@ -67,6 +69,6 @@ mapAnimation({
 - **colors** | _array_ (An array of Hex values which must correspond with the number of defined stops. Defaults to blue>red gradient: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00"])
 - **projection** | _string_ (Spatial refernce of the points x and y values. Accepted values: "EPSG:3035" or "EPSG:4326". Defaults to "EPSG:3035")
 
-# Notes
+## Notes
 
 Inspired by [Peter Beshai](https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/)

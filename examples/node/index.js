@@ -1,7 +1,7 @@
 import { mapAnimation } from "regl-map-animation";
 
 mapAnimation({
-  csvURL: "./assets/pop_5km.csv",
+  csvURL: "../pop_5km.csv",
   pointWidth: 1,
   pointMargin: 1,
   delayAtEnd: 1,
