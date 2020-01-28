@@ -1,4 +1,4 @@
-import { mapAnimation } from "E:/web/animations/test";
+import { mapAnimation } from "regl-map-animation";
 
 mapAnimation({
   csvURL: "./assets/pop_5km.csv",

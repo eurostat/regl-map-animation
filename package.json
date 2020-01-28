@@ -1,19 +1,27 @@
 {
   "name": "regl-map-animation",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "Configurable animation showing a transition from categorized geographic points on a map into a chart",
-  "main": "index.js",
+  "main": "dist/bundle.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "parcel index.js",
+    "build": "parcel build index.js --global mapAnimation --no-source-maps --out-file bundle.js",
+    "build:umd": "parcel build index.js --global mapAnimation --no-source-maps --out-file bundle.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eurostat/regl-map-animation.git"
   },
+  "files": [
+    "./dist"
+  ],
   "keywords": [
     "regl",
     "map",
-    "eurostat"
+    "eurostat",
+    "animation",
+    "webgl"
   ],
   "author": "Joe Davies",
   "license": "ISC",
@@ -24,5 +32,8 @@
   "dependencies": {
     "d3": "^5.15.0",
     "regl": "^1.3.13"
+  },
+  "devDependencies": {
+    "parcel": "^1.12.4"
   }
 }

@@ -1,3 +1,5 @@
+//Inspired by Peter Beshai: https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/
+
 const regl = require("regl")();
 const d3 = require("d3");
 
