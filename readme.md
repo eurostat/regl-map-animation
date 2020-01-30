@@ -8,7 +8,7 @@ Animate x/y point data loaded from CSV files using [regl](https://github.com/reg
 
 The project is built using UMD so it works both in browsers and in node.js
 
-### Node
+#### Node
 
 Within a node.js project simply run the following command:
 
@@ -28,7 +28,7 @@ reglMapAnimation({
 });
 ```
 
-### Browsers
+#### Browsers
 
 As a standalone script use:
 
@@ -62,7 +62,7 @@ reglMapAnimation({
 | height      | Height of the animation container                                           | number           | False    | window.innerHeight        |
 | stops       | Thresholds used for categorizing points by their "value" attribute          | array[number]    | False    |                           |
 | colors      | An array of Hex values corresponding with the number of defined stops       | array[hexString] | False    |                           |
-| projection  | Spatial reference of the points x and y values                              | string           | False    | "EPSG:3035"               |
+| projection  | Spatial reference of the points x and y values. Accepted values are "EPSG:3035" or "EPSG:4326"                              | string           | False    | "EPSG:3035"               |
 
 ## Notes
 
