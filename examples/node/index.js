@@ -1,6 +1,6 @@
-import { mapAnimation } from "regl-map-animation";
+import { reglMapAnimation } from "regl-map-animation";
 
-mapAnimation({
+reglMapAnimation({
   csvURL: "../pop_5km.csv",
   pointWidth: 1,
   pointMargin: 1,
