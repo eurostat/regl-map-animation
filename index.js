@@ -36,9 +36,9 @@ function reglMapAnimation(animationOptions) {
 
   // initialize regl
   let regl;
-  if (options.container) {
+  if (animationOptions.container) {
     regl = require("regl")({
-      container: options.container
+      container: animationOptions.container
     });
   } else {
     regl = require("regl")();

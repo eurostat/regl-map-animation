@@ -6,13 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "parcel index.html --public-url ./",
-    "build": "parcel build index.html --public-url ./"
+    "build": "parcel build index.html --no-source-maps --public-url ./"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "regl-map-animation": "^1.0.0"
+    "regl-map-animation": "1.1.4"
   },
   "devDependencies": {
     "parcel-bundler": "^1.12.4"
