@@ -1,6 +1,6 @@
 {
   "name": "regl-map-animation",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Configurable animation showing a transition from categorized geographic points on a map into a chart",
   "main": "dist/bundle.js",
   "scripts": {

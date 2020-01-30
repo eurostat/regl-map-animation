@@ -1,4 +1,4 @@
-import { reglMapAnimation } from "regl-map-animation";
+import { reglMapAnimation } from "../../index.js";
 const containerDiv = document.getElementById("container");
 
 reglMapAnimation({

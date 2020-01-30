@@ -1,7 +1,7 @@
 //Inspired by Peter Beshai: https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/
 
-const regl = require("regl")();
 const d3 = require("d3");
+let regl;
 
 const defaultOptions = {
   csvUrl: null, // URL to csv file containing the points [x,y,indicator]
@@ -35,13 +35,11 @@ function reglMapAnimation(animationOptions) {
   }
 
   // initialize regl
-  let regl;
+
   if (animationOptions.container) {
-    regl = require("regl")({
-      container: animationOptions.container
-    });
+    this.regl = require("regl")(animationOptions.container);
   } else {
-    regl = require("regl")();
+    this.regl = require("regl")();
   }
 
   //optional parameters
@@ -94,7 +92,7 @@ main = function(csvData, options) {
 
 // function to compile a draw points regl func
 createDrawPoints = function(points) {
-  const drawPoints = regl({
+  const drawPoints = this.regl({
     frag: `
 		  precision highp float;
 			varying vec3 fragColor;
@@ -199,12 +197,12 @@ createDrawPoints = function(points) {
     },
 
     uniforms: {
-      pointWidth: regl.prop("pointWidth"),
-      stageWidth: regl.prop("stageWidth"),
-      stageHeight: regl.prop("stageHeight"),
-      delayByIndex: regl.prop("delayByIndex"),
-      duration: regl.prop("duration"),
-      numPoints: regl.prop("numPoints"),
+      pointWidth: this.regl.prop("pointWidth"),
+      stageWidth: this.regl.prop("stageWidth"),
+      stageHeight: this.regl.prop("stageHeight"),
+      delayByIndex: this.regl.prop("delayByIndex"),
+      duration: this.regl.prop("duration"),
+      numPoints: this.regl.prop("numPoints"),
       // animationRadius: 0,// 15.0,
       // tick: (reglprops) => { // increase multiplier for faster animation speed
       // 	// console.log(reglprops);
@@ -251,7 +249,7 @@ animate = function(layouts, points, options) {
 
   // start an animation loop
   let startTime = null; // in seconds
-  const frameLoop = regl.frame(({ time }) => {
+  const frameLoop = this.regl.frame(({ time }) => {
     // keep track of start time so we can get time elapsed
     // this is important since time doesn't reset when starting new animations
     if (startTime === null) {
@@ -259,14 +257,14 @@ animate = function(layouts, points, options) {
     }
 
     // clear the buffer
-    regl.clear({
+    this.regl.clear({
       // background color (black)
       color: [0, 0, 0, 1],
       depth: 1
     });
 
     // draw the points using our created regl func
-    // note that the arguments are available via `regl.prop`.
+    // note that the arguments are available via `this.regl.prop`.
     drawPoints({
       pointWidth: options.pointWidth,
       stageWidth: options.width,
