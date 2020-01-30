@@ -1,12 +1,14 @@
 # regl-map-animation
 
+## [live demo](https://eurostat.github.io/regl-map-animation/examples/browsers/)
+
 Animate x/y point data loaded from CSV files using [regl](https://github.com/regl-project/regl) and categorize them for vizualization. Point data in the csv file should be defined as x,y,value - with "value" being the numerical value with which the points will be categorized.
 
-# Installation & Usage
+## Installation & Usage
 
 The project is built using UMD so it works both in browsers and in node.js
 
-## Node
+### Node
 
 Within a node.js project simply run the following command:
 
@@ -15,19 +17,19 @@ Within a node.js project simply run the following command:
 Then import:
 
 ```javascript
-import mapAnimation from "regl-map-animation";
+import { reglMapAnimation } from "regl-map-animation";
 
-mapAnimation({
+reglMapAnimation({
   csvURL: "./assets/pop_5km.csv", // xmin,ymin,value for a 5km population grid of Europe in EPSG 3035
   pointWidth: 1,
   pointMargin: 1,
-  delayAtEnd: 1,
+  delayAtEnd: 1000,
   colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
   stops: [0, 100, 1000, 5000, 10000, 30000]
 });
 ```
 
-## Browsers
+### Browsers
 
 As a standalone script use:
 
@@ -38,35 +40,33 @@ As a standalone script use:
 Then:
 
 ```javascript
-mapAnimation({
+reglMapAnimation({
   csvURL: "./assets/pop_5km.csv", // xmin,ymin,value for a 5km population grid of Europe in EPSG 3035
   pointWidth: 1,
   pointMargin: 1,
-  delayAtEnd: 1,
+  delayAtEnd: 1000,
   colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
   stops: [0, 100, 1000, 5000, 10000, 30000]
 });
 ```
 
-# Parameters
+## Parameters
 
-### Required:
+| Name        | Desc                                                                        | Type             | Required | Default                   |
+| ----------- | --------------------------------------------------------------------------- | ---------------- | -------- | ------------------------- |
+| csvUrl      | URL to csv file containing the points. Format: x,y,value                    | string           | True     |                           |
+| container   | container div on which regl will append its canvas                          | HTML element     | False    | document.body             |
+| numPoints   | number of points to display                                                 | number           | False    | no. of points in csv file |
+| pointWidth  | Width of each point.                                                        | number           | False    | 1                         |
+| pointMargin | Margin applied to the bars in the bar chart.                                | number           | False    | 1                         |
+| duration    | The duration of each transition animation in milliseconds.                  | number           | False    | 5000                      |
+| delayAtEnd  | How long to stay at a final frame before animating again (in milliseconds). | number           | False    | 0                         |
+| width       | Width of the animation container                                            | number           | False    | window.innerWidth         |
+| height      | Height of the animation container                                           | number           | False    | window.innerHeight        |
+| stops       | Thresholds used for categorizing points by their "value" attribute          | array[number]    | False    |                           |
+| colors      | An array of Hex values corresponding with the number of defined stops       | array[hexString] | False    |                           |
+| projection  | Spatial reference of the points x and y values                              | string           | False    | "EPSG:3035"               |
 
-- **csvUrl** - _string_, (URL to csv file containing the points. The points in the CSV file must have three columns: "x", "y" and "value" and should be separated by a comma.)
+## Notes
 
-### Optional:
-
-- **numPoints** | _number_ (number of points to display. Defaults to the number of points in the csv file)
-- **pointWidth** | _number_ (width of each point. Defaults to 1)
-- **pointMargin** | _number_ (Margin applied to the bars in the bar chart. Defaults to 1)
-- **duration** | _number_ (The duration of each transition animation in milliseconds. Defaults to 5000)
-- **delayAtEnd** | _number_ (How long to stay at a final frame before animating again (in milliseconds). Defaults to 0)
-- **screenWidth** | _number_ (Defaults to window.innerWidth)
-- **screenHeight** | _number_ (Defaults to window.innerHeight)
-- **stops** | _array_ (Stops used for categorizing points by their "value" attribute. Defaults to [0, 100, 1000, 5000, 10000] ),
-- **colors** | _array_ (An array of Hex values which must correspond with the number of defined stops. Defaults to blue>red gradient: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00"])
-- **projection** | _string_ (Spatial refernce of the points x and y values. Accepted values: "EPSG:3035" or "EPSG:4326". Defaults to "EPSG:3035")
-
-# Notes
-
-Inspired by [Peter Beshai](https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/)
+Inspired by [Peter Beshai](https://peterbeshai.com/) and adapted from his [excellent tutorial](https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/) on regl.

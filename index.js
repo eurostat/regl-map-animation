@@ -1,17 +1,18 @@
 //Inspired by Peter Beshai: https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/
 
-const regl = require("regl")();
 const d3 = require("d3");
+var regl = null;
 
 const defaultOptions = {
   csvUrl: null, // URL to csv file containing the points [x,y,indicator]
+  container: null,
   numPoints: null, // number of points to display
   pointWidth: 1, // width of each point
   pointMargin: 1,
   duration: 5000, // each transition duration
-  delayAtEnd: 0, // how long to stay at a final frame before animating again (in seconds)
-  screenWidth: null,
-  screenHeight: null,
+  delayAtEnd: 0, // how long to stay at a final frame before animating again (in milliseconds)
+  width: null,
+  height: null,
   colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00"],
   stops: [0, 100, 1000, 5000, 10000],
   projection: "EPSG:3035"
@@ -22,14 +23,24 @@ let currentLayout = 0; // initial layout is 0
 /**
  * Main function to use when creating a animation
  */
-function mapAnimation(animationOptions) {
+function reglMapAnimation(animationOptions) {
   /*   constructor(options = {}) { */
   options = Object.assign({}, animationOptions);
+
   if (animationOptions.csvURL) {
     options.csvURL = animationOptions.csvURL;
   } else {
     console.log("Please define csvURL");
     return;
+  }
+
+  // initialize regl
+
+  if (animationOptions.container) {
+    regl = require("regl")(animationOptions.container);
+  } else {
+    console.info("no container specified");
+    regl = require("regl")();
   }
 
   //optional parameters
@@ -38,17 +49,17 @@ function mapAnimation(animationOptions) {
   options.pointMargin = animationOptions.pointMargin || defaultOptions.pointMargin;
   options.duration = animationOptions.duration || defaultOptions.duration;
   options.delayAtEnd = animationOptions.delayAtEnd || defaultOptions.delayAtEnd;
-  options.screenWidth = animationOptions.screenWidth || window.innerWidth;
-  options.screenHeight = animationOptions.screenHeight || window.innerHeight;
+  options.width = animationOptions.width || window.innerWidth;
+  options.height = animationOptions.height || window.innerHeight;
   options.colors = animationOptions.colors || defaultOptions.colors;
   options.stops = animationOptions.stops || defaultOptions.stops;
   options.projection = animationOptions.projection || defaultOptions.projection;
 
+  // request and parse csv file
   loadData(options).then(({ csvData }) => {
     if (!options.numPoints) {
       options.numPoints = csvData.length;
     }
-    console.info("data has loaded. initializing regl...");
     console.info("number of points in csv file:", csvData.length);
     delayByIndex = 500 / options.numPoints;
     maxDuration = options.duration + delayByIndex * options.numPoints;
@@ -57,16 +68,19 @@ function mapAnimation(animationOptions) {
   });
 }
 
+// where the fun begins
 main = function(csvData, options) {
   // create initial set of points from csv data
   const points = d3.range(options.numPoints).map(d => ({}));
 
+  // define the functions that will manipulate the data
   const toMap = points => mapLayout(points, csvData, options);
   const toBars = points => barsLayout(points, csvData, options);
 
+  // initial points start from the centre
   points.forEach((d, i) => {
-    d.tx = options.screenWidth / 2;
-    d.ty = options.screenHeight / 2;
+    d.tx = options.width / 2;
+    d.ty = options.height / 2;
     d.colorEnd = [0, 0, 0];
   });
 
@@ -119,12 +133,6 @@ createDrawPoints = function(points) {
            x,
            y
            );
-
-        //rotate 90 degrees doesnt seem to correct the coordinates
-          //return vec2(
-           // x * rotation.y + y * rotation.x,
-           // y * rotation.y - x * rotation.x
-           // );
       }
       
 
@@ -260,8 +268,8 @@ animate = function(layouts, points, options) {
     // note that the arguments are available via `regl.prop`.
     drawPoints({
       pointWidth: options.pointWidth,
-      stageWidth: options.screenWidth,
-      stageHeight: options.screenHeight,
+      stageWidth: options.width,
+      stageHeight: options.height,
       duration: options.duration,
       numPoints: options.numPoints,
       delayByIndex,
@@ -278,8 +286,8 @@ animate = function(layouts, points, options) {
       // when restarting at the beginning, come back from the middle again
       if (currentLayout === 0) {
         points.forEach((d, i) => {
-          d.tx = options.screenWidth / 2;
-          d.ty = options.screenHeight / 2;
+          d.tx = options.width / 2;
+          d.ty = options.height / 2;
           d.colorEnd = [0, 0, 0];
         });
       }
@@ -336,7 +344,7 @@ mapLayout = (points, csvData, options) => {
         [lngExtent[1] * 1000, latExtent[1] * 1000]
       ]
     };
-    var projection = d3.geoMercator().fitSize([options.screenWidth, options.screenHeight], extentGeoJson);
+    var projection = d3.geoMercator().fitSize([options.width, options.height], extentGeoJson);
     //
 
     //For 3035?... .geoAzimuthalEqualArea().fitSize([width, height], extentGeoJson);
@@ -350,7 +358,7 @@ mapLayout = (points, csvData, options) => {
       } else if (options.projection == "EPSG:3035") {
         // FIXME: project from EPSG 3035 to webgl screen coords properly, or use proj4 to always project to web mercator
         d.x = parseInt(point.x) / 5; //convert & center coords
-        d.y = (parseInt(point.y) / 5) * -1 + options.screenHeight + 200; //invert the y coordinates and add height for centering
+        d.y = (parseInt(point.y) / 5) * -1 + options.height + 200; //invert the y coordinates and add height for centering
       }
     });
   }
@@ -360,7 +368,7 @@ mapLayout = (points, csvData, options) => {
 
 //draw bar graph by defining point x/y based on pointclass value
 barsLayout = (points, csvData, options) => {
-  var pointWidth = options.screenWidth / 800;
+  var pointWidth = options.width / 800;
   var pointMargin = options.pointMargin;
   var byValue = d3
     .nest()
@@ -376,8 +384,8 @@ barsLayout = (points, csvData, options) => {
     });
   var binMargin = options.pointWidth * 10;
   var numBins = byValue.length;
-  var minBinWidth = options.screenWidth / (numBins * 2.5);
-  var totalExtraWidth = options.screenWidth - binMargin * (numBins - 1) - minBinWidth * numBins;
+  var minBinWidth = options.width / (numBins * 2.5);
+  var totalExtraWidth = options.width - binMargin * (numBins - 1) - minBinWidth * numBins;
   var binWidths = byValue.map(function(d) {
     return Math.ceil((d.values.length / csvData.length) * totalExtraWidth) + minBinWidth;
   });
@@ -424,7 +432,7 @@ barsLayout = (points, csvData, options) => {
     var row = Math.floor(binCount / binCols);
     var col = binCount % binCols;
     var x = binStart + col * increment;
-    var y = -row * increment + options.screenHeight;
+    var y = -row * increment + options.height;
     bin.binCount += 1;
     return {
       x: x,
@@ -469,4 +477,4 @@ classifyPoint = (glPoint, csvPoint, colors, stops) => {
   }
 };
 
-module.exports.mapAnimation = mapAnimation;
+module.exports.reglMapAnimation = reglMapAnimation;

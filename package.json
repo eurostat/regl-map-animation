@@ -1,13 +1,13 @@
 {
   "name": "regl-map-animation",
-  "version": "1.1.2",
+  "version": "1.1.8",
   "description": "Configurable animation showing a transition from categorized geographic points on a map into a chart",
   "main": "dist/bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "parcel index.js",
-    "build": "parcel build index.js --global mapAnimation --no-source-maps --out-file bundle.js",
-    "build:umd": "parcel build index.js --global mapAnimation --no-source-maps --out-file bundle.js"
+    "build": "parcel build index.js --global reglMapAnimation --no-source-maps --out-file bundle.js",
+    "build:umd": "parcel build index.js --global reglMapAnimation --no-source-maps --out-file bundle.js"
   },
   "repository": {
     "type": "git",

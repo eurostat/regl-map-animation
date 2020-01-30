@@ -1,7 +1,9 @@
-import { mapAnimation } from "regl-map-animation";
+import { reglMapAnimation } from "../../index.js";
+const containerDiv = document.getElementById("container");
 
-mapAnimation({
-  csvURL: "./assets/pop_5km.csv",
+reglMapAnimation({
+  csvURL: "../../pop_5km.csv",
+  container: containerDiv,
   pointWidth: 1,
   pointMargin: 1,
   delayAtEnd: 1,
