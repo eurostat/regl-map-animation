@@ -4,8 +4,6 @@
 
 Animate x/y point data loaded from CSV files using [regl](https://github.com/regl-project/regl) and categorize them for vizualization. Point data in the csv file should be defined as x,y,value - with "value" being the numerical value with which the points will be categorized.
 
-![alt text](https://github.com/eurostat/regl-map-animation/blob/master/preview.png)
-
 ## Installation & Usage
 
 The project is built using UMD so it works both in browsers and in node.js
