@@ -8,15 +8,27 @@
   </head>
   <body>
     <script src="https://unpkg.com/regl-map-animation/dist/bundle.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
+      integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y="
+      crossorigin="anonymous"
+    ></script>
     <script>
-      reglMapAnimation.reglMapAnimation({
-        csvURL: "../pop_5km.csv",
-        pointWidth: 1,
-        pointMargin: 1,
-        delayAtEnd: 1,
-        duration: 1000,
-        colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
-        stops: [0, 100, 1000, 5000, 10000, 30000]
+      d3.csv("../../pop_5km.csv", d => {
+        return {
+          value: d.value,
+          y: +d.y,
+          x: +d.x
+        };
+      }).then(pointData => {
+        reglMapAnimation({
+          pointData,
+          pointWidth: 1,
+          pointMargin: 1,
+          delayAtEnd: 1,
+          colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
+          stops: [0, 100, 1000, 5000, 10000, 30000]
+        });
       });
     </script>
   </body>

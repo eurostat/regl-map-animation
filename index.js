@@ -4,7 +4,7 @@ const d3 = require("d3");
 var regl = null;
 
 const defaultOptions = {
-  csvUrl: null, // URL to csv file containing the points [x,y,indicator]
+  pointData: null, // URL to csv file containing the points [x,y,indicator]
   container: null,
   numPoints: null, // number of points to display
   pointWidth: 1, // width of each point
@@ -15,7 +15,9 @@ const defaultOptions = {
   height: null,
   colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00"],
   stops: [0, 100, 1000, 5000, 10000],
-  projection: "EPSG:3035"
+  projection: "EPSG:3035",
+  backgroundColor: [0, 0, 0, 1],
+  mapPadding: 50 //padding to animation frame in pixels
 };
 
 let currentLayout = 0; // initial layout is 0
@@ -27,24 +29,16 @@ function reglMapAnimation(animationOptions) {
   /*   constructor(options = {}) { */
   options = Object.assign({}, animationOptions);
 
-  if (animationOptions.csvURL) {
-    options.csvURL = animationOptions.csvURL;
-  } else {
-    console.log("Please define csvURL");
-    return;
-  }
-
   // initialize regl
 
   if (animationOptions.container) {
     regl = require("regl")(animationOptions.container);
   } else {
-    console.info("no container specified");
     regl = require("regl")();
   }
 
   //optional parameters
-  options.numPoints = animationOptions.numPoints || null; //later defined as csvArray.length
+  options.numPoints = animationOptions.numPoints || null; //later defined as pointData.length
   options.pointWidth = animationOptions.pointWidth || defaultOptions.pointWidth;
   options.pointMargin = animationOptions.pointMargin || defaultOptions.pointMargin;
   options.duration = animationOptions.duration || defaultOptions.duration;
@@ -54,18 +48,18 @@ function reglMapAnimation(animationOptions) {
   options.colors = animationOptions.colors || defaultOptions.colors;
   options.stops = animationOptions.stops || defaultOptions.stops;
   options.projection = animationOptions.projection || defaultOptions.projection;
+  options.backgroundColor = animationOptions.backgroundColor || defaultOptions.backgroundColor;
+  options.mapPadding = animationOptions.mapPadding || defaultOptions.mapPadding;
 
-  // request and parse csv file
-  loadData(options).then(({ csvData }) => {
+  if (options.pointData) {
     if (!options.numPoints) {
-      options.numPoints = csvData.length;
+      options.numPoints = options.pointData.length;
     }
-    console.info("number of points in csv file:", csvData.length);
+
     delayByIndex = 500 / options.numPoints;
     maxDuration = options.duration + delayByIndex * options.numPoints;
-
-    main(csvData, options);
-  });
+    main(options.pointData, options);
+  }
 }
 
 // where the fun begins
@@ -77,11 +71,14 @@ main = function(csvData, options) {
   const toMap = points => mapLayout(points, csvData, options);
   const toBars = points => barsLayout(points, csvData, options);
 
-  // initial points start from the centre
+  // initial points start from random
+  colorDataByClass(points, csvData, options);
   points.forEach((d, i) => {
-    d.tx = options.width / 2;
-    d.ty = options.height / 2;
-    d.colorEnd = [0, 0, 0];
+    var posx = Math.floor(Math.random() * options.width);
+    var posy = Math.floor(Math.random() * options.height);
+    d.tx = posx;
+    d.ty = posy;
+    d.colorEnd = d.color;
   });
 
   //define order of transitions
@@ -260,7 +257,7 @@ animate = function(layouts, points, options) {
     // clear the buffer
     regl.clear({
       // background color (black)
-      color: [0, 0, 0, 1],
+      color: options.backgroundColor,
       depth: 1
     });
 
@@ -284,81 +281,63 @@ animate = function(layouts, points, options) {
       currentLayout = (currentLayout + 1) % layouts.length;
 
       // when restarting at the beginning, come back from the middle again
-      if (currentLayout === 0) {
+      /*       if (currentLayout === 0) {
         points.forEach((d, i) => {
           d.tx = options.width / 2;
           d.ty = options.height / 2;
           d.colorEnd = [0, 0, 0];
         });
-      }
+      } */
 
       animate(layouts, points, options);
     }
   });
 };
 
-loadData = function(options) {
-  let pointClass;
-  return new Promise(function(resolve, reject) {
-    var getCSV = function() {
-      var args = [],
-        len = arguments.length;
-      while (len--) args[len] = arguments[len];
-      return d3.csv(
-        args[0],
-        function(d) {
-          // add color and classification values
-          return {
-            value: d.value,
-            class: pointClass,
-            y: +d.y,
-            x: +d.x
-          };
-        },
-        args[1]
-      );
-    };
-    Promise.all([getCSV(options.csvURL)])
-      .then(([parsedCSV]) => {
-        resolve({
-          csvData: parsedCSV
-        });
-      })
-      .catch(err => console.log("Error loading or parsing data."));
-  });
-};
-
 mapLayout = (points, csvData, options) => {
   function projectData(data) {
-    //WEB MERCATOR...
-    var latExtent = d3.extent(csvData, function(d) {
-      return d.y;
+    var yExtent = d3.extent(csvData, function(d) {
+      return parseInt(d.y);
     });
-    var lngExtent = d3.extent(csvData, function(d) {
-      return d.x;
+    var xExtent = d3.extent(csvData, function(d) {
+      return parseInt(d.x);
     });
     var extentGeoJson = {
       type: "LineString",
       coordinates: [
-        [lngExtent[0] * 1000, latExtent[0] * 1000],
-        [lngExtent[1] * 1000, latExtent[1] * 1000]
+        [xExtent[0], yExtent[0]],
+        [xExtent[1], yExtent[1]]
       ]
     };
-    var projection = d3.geoMercator().fitSize([options.width, options.height], extentGeoJson);
-    //
+    if (options.projection == "EPSG:4326") {
+      var projection = d3.geoMercator().fitSize([options.width, options.height], extentGeoJson);
+    } else if (options.projection == "EPSG:3035") {
+      /*       var projection = d3
+      .geoAzimuthalEqualArea()
+      .rotate([-10, -52])
+      .scale(700) */
 
-    //For 3035?... .geoAzimuthalEqualArea().fitSize([width, height], extentGeoJson);
-    //TODO: truncate coords - current data is already minified
+      //use d3 scaling to transform coords
+      var xScale3035 = d3
+        .scaleLinear()
+        .domain(xExtent) // unit: km
+        .range([0 + options.mapPadding, options.width - options.mapPadding]); // unit: pixels
+      var yScale3035 = d3
+        .scaleLinear()
+        .domain(yExtent) // unit: km
+        .range([options.height - options.mapPadding, 0 + options.mapPadding]); // unit: pixels
+    }
+
     data.forEach(function(d, i) {
       var point = csvData[i];
+      let location;
       if (options.projection == "EPSG:4326") {
-        var location = projection([point.x * 1000, point.y * 1000]);
+        location = projection([point.x, point.y]);
         d.x = location[0];
         d.y = location[1];
       } else if (options.projection == "EPSG:3035") {
-        // FIXME: project from EPSG 3035 to webgl screen coords properly, or use proj4 to always project to web mercator
-        d.x = parseInt(point.x) / 5; //convert & center coords
-        d.y = (parseInt(point.y) / 5) * -1 + options.height + 200; //invert the y coordinates and add height for centering
+        d.x = xScale3035(parseInt(point.x));
+        d.y = yScale3035(parseInt(point.y));
       }
     });
   }
