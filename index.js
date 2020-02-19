@@ -16,7 +16,7 @@ const defaultOptions = {
   colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00"],
   stops: [0, 100, 1000, 5000, 10000],
   projection: "EPSG:3035",
-  backgroundColor: [0, 0, 0, 1],
+  backgroundColor: [1, 1, 1, 1],
   mapPadding: 50 //padding to animation frame in pixels
 };
 
