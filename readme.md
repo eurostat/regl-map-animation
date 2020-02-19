@@ -19,23 +19,14 @@ Then import:
 ```javascript
 import { reglMapAnimation } from "regl-map-animation";
 
-const containerDiv = document.getElementById("containerId");
-d3.csv("../../pop_5km.csv", d => {
-  return {
-    value: d.value,
-    y: +d.y,
-    x: +d.x
-  };
-}).then(pointData => {
-  reglMapAnimation({
-    pointData,
-    container: containerDiv,
-    pointWidth: 1,
-    pointMargin: 1,
-    delayAtEnd: 1,
-    colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
-    stops: [0, 100, 1000, 5000, 10000, 30000]
-  });
+reglMapAnimation({
+  pointData,
+  container: containerDiv,
+  pointWidth: 1,
+  pointMargin: 1,
+  delayAtEnd: 1,
+  colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
+  stops: [0, 100, 1000, 5000, 10000, 30000]
 });
 ```
 
@@ -50,10 +41,11 @@ As a standalone script use:
 Then:
 
 ```javascript
-reglMapAnimation({
-  csvURL: "./assets/pop_5km.csv", // xmin,ymin,value for a 5km population grid of Europe in EPSG 3035
+ reglMapAnimation.reglMapAnimation({
+  pointData,
   pointWidth: 1,
-  delayAtEnd: 1000,
+  pointMargin: 1,
+  delayAtEnd: 1,
   colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
   stops: [0, 100, 1000, 5000, 10000, 30000]
 });
