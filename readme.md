@@ -2,7 +2,7 @@
 
 ## [live demo](https://eurostat.github.io/regl-map-animation/examples/browsers/)
 
-Animate x/y point data loaded from CSV files using [regl](https://github.com/regl-project/regl) and categorize them for vizualization. Point data in the csv file should be defined as x,y,value - with "value" being the numerical value with which the points will be categorized.
+Animate x/y point data using [regl](https://github.com/regl-project/regl) and categorize them for vizualization. Point data should be defined as an array of objects {x,y,value} - with "value" being the numerical indicator with which the points will be categorized.
 
 ## Installation & Usage
 
@@ -19,12 +19,23 @@ Then import:
 ```javascript
 import { reglMapAnimation } from "regl-map-animation";
 
-reglMapAnimation({
-  csvURL: "./assets/pop_5km.csv", // xmin,ymin,value for a 5km population grid of Europe in EPSG 3035
-  pointWidth: 1,
-  delayAtEnd: 1000,
-  colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
-  stops: [0, 100, 1000, 5000, 10000, 30000]
+const containerDiv = document.getElementById("containerId");
+d3.csv("../../pop_5km.csv", d => {
+  return {
+    value: d.value,
+    y: +d.y,
+    x: +d.x
+  };
+}).then(pointData => {
+  reglMapAnimation({
+    pointData,
+    container: containerDiv,
+    pointWidth: 1,
+    pointMargin: 1,
+    delayAtEnd: 1,
+    colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
+    stops: [0, 100, 1000, 5000, 10000, 30000]
+  });
 });
 ```
 
