@@ -4,11 +4,11 @@ const d3 = require("d3");
 var regl = null;
 
 const defaultOptions = {
-  pointData: null, // URL to csv file containing the points [x,y,indicator]
-  container: null,
+  pointData: null, // parsed point data [x,y,indicator]
+  container: null, //HTML DIV element that REGL will use to render the animation
   numPoints: null, // number of points to display
   pointWidth: 1, // width of each point
-  pointMargin: 1,
+  pointMargin: 1, // Margin used for bar chart
   duration: 5000, // each transition duration
   delayAtEnd: 0, // how long to stay at a final frame before animating again (in milliseconds)
   width: null,
