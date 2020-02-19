@@ -1,6 +1,6 @@
 # regl-map-animation
 
-## [live demo](https://eurostat.github.io/regl-map-animation/examples/browsers/)
+## [live demo](https://observablehq.com/@joewdavies/animation-of-the-eurostat-population-grid-using-regl)
 
 Animate x/y point data using [regl](https://github.com/regl-project/regl) and categorize them for vizualization. Point data should be defined as an array of objects {x,y,value} - with "value" being the numerical indicator with which the points will be categorized.
 
