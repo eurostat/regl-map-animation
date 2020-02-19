@@ -66,8 +66,8 @@ Then:
 | stops       | Thresholds used for categorizing points by their "value" attribute          | array[number]    | False    |                           |
 | colors      | An array of Hex values corresponding with the number of defined stops       | array[hexString] | False    |                           |
 | projection  | Spatial reference of the points x and y values. Accepted values are "EPSG:3035" or "EPSG:4326"                              | string           | False    | "EPSG:3035"               |
-| mapPadding      | Add padding (in pixels) to the map animation      | number | False    |    
-
+| mapPadding      | Add padding (in pixels) to the map animation      | number | False    |   
+| backgroundColor      | Sets the container's background colour (WebGL RGBA array of values from 0 to 1)      | [number,number,number,number] | False    | [1,1,1,1] (white)
 ## Notes
 
 Inspired by [Peter Beshai](https://peterbeshai.com/) and adapted from his [excellent tutorial](https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/) on regl.
