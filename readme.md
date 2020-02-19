@@ -52,12 +52,12 @@ reglMapAnimation({
 
 | Name        | Desc                                                                        | Type             | Required | Default                   |
 | ----------- | --------------------------------------------------------------------------- | ---------------- | -------- | ------------------------- |
-| pointData      | An array of points Format: x,y,indicator - where indicator is the value used for categorization and colouring                    | [x,y,indicator]           | True     |                           |
+| pointData      | An array of objects with the following format: {x,y,value} - where value is the indicator used for categorization and colouring                    | [{x: number, y: number, value: number}]           | True     |                           |
 | container   | container div on which regl will append its canvas                          | HTML element     | False    | document.body             |
 | numPoints   | number of points to display                                                 | number           | False    | no. of points in csv file |
-| pointMargin | Margin applied to the bars in the bar chart.                                | number           | False    | 1                         |
-| duration    | The duration of each transition animation in milliseconds.                  | number           | False    | 5000                      |
-| delayAtEnd  | How long to stay at a final frame before animating again (in milliseconds). | number           | False    | 0                         |
+| pointMargin | Margin applied to the bars in the bar chart                                | number           | False    | 1                         |
+| duration    | The duration of each transition animation in milliseconds                 | number           | False    | 5000                      |
+| delayAtEnd  | How long to stay at a final frame before animating again (in milliseconds) | number           | False    | 0                         |
 | width       | Width of the animation container (pixels)                                           | number           | False    | window.innerWidth         |
 | height      | Height of the animation container (pixels)                                           | number           | False    | window.innerHeight        |
 | stops       | Thresholds used for categorizing points by their "value" attribute          | array[number]    | False    |                           |
