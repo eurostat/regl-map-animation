@@ -53,7 +53,7 @@ Then:
 
 ## Parameters
 
-| Name        | Desc                                                                        | Type             | Required | Default                   |
+| Name        | Description                                                                        | Type             | Required | Default                   |
 | ----------- | --------------------------------------------------------------------------- | ---------------- | -------- | ------------------------- |
 | pointData      | An array of objects with the following format: {x,y,value} - where value is the indicator used for categorization and colouring                    | [{x: number, y: number, value: number}]           | True     |                           |
 | container   | container div on which regl will append its canvas                          | HTML element     | False    | document.body             |
