@@ -83,7 +83,8 @@ export function animate(animationOptions) {
     animationOptions.binLabelOffsetY || defaultOptions.binLabelOffsetY;
   options.legendTitle =
     animationOptions.legendTitle || defaultOptions.legendTitle;
-  options.binWidth = animationOptions.binWidth || options.width / options.stops;
+  options.binWidth =
+    animationOptions.binWidth || options.width / options.stops.length;
 
   if (options.pointData) {
     if (!options.numPoints) {
