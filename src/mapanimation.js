@@ -464,26 +464,27 @@ function mapLayout(points, csvData, options) {
 }
 
 function hideLegend() {
-  document.getElementsByClassName("regl-animation-legend")[0].style.display =
-    "none";
+  let el = document.getElementsByClassName("regl-animation-legend")[0];
+  el.classList.remove("visible");
 }
 function hideLabels() {
   let labels = document.getElementsByClassName("regl-animation-label");
   if (labels.length)
     for (var i = 0; i < labels.length; i++) {
-      labels[i].style.display = "none";
+      labels[i].classList.remove("visible");
     }
 }
 function showLegend() {
-  if (document.getElementsByClassName("regl-animation-legend")[0])
-    document.getElementsByClassName("regl-animation-legend")[0].style.display =
-      "block";
+  if (document.getElementsByClassName("regl-animation-legend")[0]) {
+    let el = document.getElementsByClassName("regl-animation-legend")[0];
+    el.classList.add("visible");
+  }
 }
 function showLabels() {
   let labels = document.getElementsByClassName("regl-animation-label");
   if (labels.length)
     for (var i = 0; i < labels.length; i++) {
-      labels[i].style.display = "block";
+      labels[i].classList.add("visible");
     }
 }
 
@@ -585,6 +586,7 @@ function barsLayout(points, csvData, options) {
         let label = createLabel(bin, options);
         options.container.appendChild(label);
       });
+      showLabels();
     }
   }, options.duration);
 }
