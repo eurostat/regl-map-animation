@@ -24,6 +24,7 @@ const defaultOptions = {
   legend: true,
   legendTitle: "Legend",
   binLabels: true,
+  binWidth: null,
   binLabelOffsetX: -40,
   binLabelOffsetY: -20,
   binLabelFunction: function(bin) {
@@ -43,7 +44,9 @@ export function animate(animationOptions) {
   // initialize regl
   if (animationOptions.container) {
     //clear container
-    regl.destroy();
+    if (regl) {
+      regl.destroy();
+    }
     while (animationOptions.container.firstChild) {
       animationOptions.container.removeChild(
         animationOptions.container.lastChild
@@ -56,16 +59,6 @@ export function animate(animationOptions) {
 
   //optional parameters
   options.container = animationOptions.container || document.body;
-  options.legend = animationOptions.legend || defaultOptions.legend;
-  options.labels = animationOptions.labels || defaultOptions.labels;
-  options.binLabelFunction =
-    animationOptions.binLabelFunction || defaultOptions.binLabelFunction;
-  options.binLabelOffsetX =
-    animationOptions.binLabelOffsetX || defaultOptions.binLabelOffsetX;
-  options.binLabelOffsetY =
-    animationOptions.binLabelOffsetY || defaultOptions.binLabelOffsetY;
-  options.legendTitle =
-    animationOptions.legendTitle || defaultOptions.legendTitle;
   options.numPoints = animationOptions.numPoints || null; //later defined as pointData.length
   options.pointWidth = animationOptions.pointWidth || defaultOptions.pointWidth;
   options.pointMargin =
@@ -80,6 +73,17 @@ export function animate(animationOptions) {
   options.backgroundColor =
     animationOptions.backgroundColor || defaultOptions.backgroundColor;
   options.mapPadding = animationOptions.mapPadding || defaultOptions.mapPadding;
+  options.legend = animationOptions.legend || defaultOptions.legend;
+  options.labels = animationOptions.labels || defaultOptions.labels;
+  options.binLabelFunction =
+    animationOptions.binLabelFunction || defaultOptions.binLabelFunction;
+  options.binLabelOffsetX =
+    animationOptions.binLabelOffsetX || defaultOptions.binLabelOffsetX;
+  options.binLabelOffsetY =
+    animationOptions.binLabelOffsetY || defaultOptions.binLabelOffsetY;
+  options.legendTitle =
+    animationOptions.legendTitle || defaultOptions.legendTitle;
+  options.binWidth = animationOptions.binWidth || options.width / options.stops;
 
   if (options.pointData) {
     if (!options.numPoints) {
@@ -93,6 +97,7 @@ export function animate(animationOptions) {
   }
 
   if (options.legend) addLegendToContainer(options);
+  return options.container;
 }
 
 // where the fun begins
@@ -504,7 +509,7 @@ function barsLayout(points, csvData, options) {
   var totalExtraWidth =
     options.width - binMargin * (numBins - 1) - minBinWidth * numBins;
   var binWidths = byValue.map(function(d) {
-    return options.width / numBins;
+    return options.binWidth;
     // return (
     //   Math.ceil((d.values.length / csvData.length) * totalExtraWidth) +
     //   minBinWidth

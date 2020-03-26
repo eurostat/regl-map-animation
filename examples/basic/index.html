@@ -23,11 +23,12 @@
       }).then(pointData => {
         ReglMapAnimation.animate({
           pointData,
-          duration: 5000,
-          delayAtEnd: 4000,
+          duration: 500,
+          delayAtEnd: 400,
           legend: true,
           legendTitle: "Population per 5km²",
           binLabels: true,
+          binWidth: 200,
           binLabelFunction: function(bin) {
             return (bin.binCount * 5).toLocaleString() + "km²";
           }
