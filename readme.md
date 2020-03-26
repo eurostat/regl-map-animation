@@ -17,17 +17,19 @@ Within a node.js project simply run the following command:
 Then import:
 
 ```javascript
-import { reglMapAnimation } from "regl-map-animation";
+import { animate } from "regl-map-animation";
 
-reglMapAnimation({
-  pointData,
-  container: containerDiv,
-  pointWidth: 1,
-  pointMargin: 1,
-  delayAtEnd: 1,
-  colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
-  stops: [0, 100, 1000, 5000, 10000, 30000]
-});
+        animate({
+          pointData,
+          duration: 5000,
+          delayAtEnd: 4000,
+          legend: true,
+          legendTitle: "Population per 5km²"
+          binLabels:true,
+                    binLabelFunction: function(bin) {
+            return (bin.binCount * 5).toLocaleString() + "km²";
+          }
+        });
 ```
 
 #### Browsers
@@ -35,39 +37,49 @@ reglMapAnimation({
 As a standalone script use:
 
 ```html
-<script src="https://unpkg.com/regl-map-animation/dist/bundle.js"></script>
+<script src="https://unpkg.com/regl-map-animation/build/reglmapanimation.js"></script>
 ```
 
 Then:
 
 ```javascript
- reglMapAnimation.reglMapAnimation({
-  pointData,
-  pointWidth: 1,
-  pointMargin: 1,
-  delayAtEnd: 1,
-  colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
-  stops: [0, 100, 1000, 5000, 10000, 30000]
-});
+ ReglMapAnimation.animate({
+    pointData,
+    duration: 5000,
+    delayAtEnd: 4000,
+    legend: true,
+    legendTitle: "Population per 5km²",
+    binLabels: true,
+    binLabelFunction: function(bin) {
+      //    bin = {
+      // value: 
+      // binWidth: 
+      // binStart: 
+      // binCount: 
+      // binCols: 
+      // }
+      return (bin.binCount * 5).toLocaleString() + "km²";
+    }
+  });
 ```
 
 ## Parameters
 
-| Name        | Description                                                                        | Type             | Required | Default                   |
-| ----------- | --------------------------------------------------------------------------- | ---------------- | -------- | ------------------------- |
-| pointData      | An array of objects with the following format: {x,y,value} - where value is the indicator used for categorization and colouring                    | [{x: number, y: number, value: number}]           | True     |                           |
-| container   | container div on which regl will append its canvas                          | HTML element     | False    | document.body             |
-| numPoints   | number of points to display                                                 | number           | False    | pointData.length |
-| pointMargin | Margin applied to the bars in the bar chart                                | number           | False    | 1                         |
-| duration    | The duration of each transition animation in milliseconds                 | number           | False    | 5000                      |
-| delayAtEnd  | How long to stay at a final frame before animating again (in milliseconds) | number           | False    | 0                         |
-| width       | Width of the animation container (pixels)                                           | number           | False    | window.innerWidth         |
-| height      | Height of the animation container (pixels)                                           | number           | False    | window.innerHeight        |
-| stops       | Thresholds used for categorizing points by their "value" attribute          | array[number]    | False    |                           |
-| colors      | An array of Hex values corresponding with the number of defined stops       | array[hexString] | False    |                           |
-| projection  | Spatial reference of the points x and y values. Accepted values are "EPSG:3035" or "EPSG:4326"                              | string           | False    | "EPSG:3035"               |
-| mapPadding      | Add padding (in pixels) to the map animation      | number | False    |   
-| backgroundColor      | Sets the container's background colour (WebGL RGBA array of values from 0 to 1)      | [number,number,number,number] | False    | [1,1,1,1] (white)
+| Name            | Description                                                                                                                     | Type                                    | Required | Default            |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------- | ------------------ |
+| pointData       | An array of objects with the following format: {x,y,value} - where value is the indicator used for categorization and colouring | [{x: number, y: number, value: number}] | True     |                    |
+| container       | container div on which regl will append its canvas                                                                              | HTML element                            | False    | document.body      |
+| numPoints       | number of points to display                                                                                                     | number                                  | False    | pointData.length   |
+| pointMargin     | Margin applied to the bars in the bar chart                                                                                     | number                                  | False    | 1                  |
+| duration        | The duration of each transition animation in milliseconds                                                                       | number                                  | False    | 5000               |
+| delayAtEnd      | How long to stay at a final frame before animating again (in milliseconds)                                                      | number                                  | False    | 0                  |
+| width           | Width of the animation container (pixels)                                                                                       | number                                  | False    | window.innerWidth  |
+| height          | Height of the animation container (pixels)                                                                                      | number                                  | False    | window.innerHeight |
+| stops           | Thresholds used for categorizing points by their "value" attribute                                                              | array[number]                           | False    |                    |
+| colors          | An array of Hex values corresponding with the number of defined stops                                                           | array[hexString]                        | False    |                    |
+| projection      | Spatial reference of the points x and y values. Accepted values are "EPSG:3035" or "EPSG:4326"                                  | string                                  | False    | "EPSG:3035"        |
+| mapPadding      | Add padding (in pixels) to the map animation                                                                                    | number                                  | False    |
+| backgroundColor | Sets the container's background colour (WebGL RGBA array of values from 0 to 1)                                                 | [number,number,number,number]           | False    | [1,1,1,1] (white)  |
 ## Notes
 
 Inspired by [Peter Beshai](https://peterbeshai.com/) and adapted from his [excellent tutorial](https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/) on regl.

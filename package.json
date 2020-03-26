@@ -1,19 +1,22 @@
 {
   "name": "regl-map-animation",
-  "version": "1.1.12",
+  "version": "1.1.14",
   "description": "Configurable animation showing a transition from categorized geographic points on a map into a chart",
-  "main": "dist/bundle.js",
+  "main": "build/reglmapanimation.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "parcel index.js",
-    "build": "parcel build index.js --global reglMapAnimation --no-source-maps --out-file bundle.js"
+    "start": "npm run build-dev",
+    "build": "npm run build-prod",
+    "server": "webpack-dev-server --mode development",
+    "build-dev": "webpack --config webpack.config.dev.js",
+    "build-prod": "webpack --config webpack.config.prod.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eurostat/regl-map-animation.git"
   },
   "files": [
-    "./dist"
+    "./build"
   ],
   "keywords": [
     "regl",
@@ -30,9 +33,14 @@
   "homepage": "https://github.com/eurostat/regl-map-animation#readme",
   "dependencies": {
     "d3": "^5.15.0",
-    "regl": "^1.3.13"
+    "regl": "^1.3.13",
+    "d3-svg-legend": "^2.25.6"
   },
   "devDependencies": {
-    "parcel": "^1.12.4"
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11",
+    "webpack-livereload-plugin": "^2.3.0",
+    "css-loader": "^3.4.2",
+    "style-loader": "^1.1.3"
   }
 }

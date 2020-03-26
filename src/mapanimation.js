@@ -1,23 +1,34 @@
 //Inspired by Peter Beshai: https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/
 
-const d3 = require("d3");
+import * as d3 from "d3";
+import "./styles.css";
+import { legendColor } from "d3-svg-legend";
+
 var regl = null;
 
 const defaultOptions = {
   pointData: null, // parsed point data [x,y,indicator]
-  container: null, //HTML DIV element that REGL will use to render the animation
+  containerId: null, //HTML DIV element that REGL will use to render the animation
   numPoints: null, // number of points to display
   pointWidth: 1, // width of each point
-  pointMargin: 1, // Margin used for bar chart
+  pointMargin: 0, // Margin used for bar chart
   duration: 5000, // each transition duration
-  delayAtEnd: 0, // how long to stay at a final frame before animating again (in milliseconds)
+  delayAtEnd: 1000, // how long to stay at a final frame before animating again (in seconds)
   width: null,
   height: null,
-  colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00"],
-  stops: [0, 100, 1000, 5000, 10000],
+  colors: ["#005cff", "#55e238", "#ebff0a", "#ff0f00"],
+  stops: [0, 100, 1000, 10000],
   projection: "EPSG:3035",
   backgroundColor: [1, 1, 1, 1],
-  mapPadding: 50 //padding to animation frame in pixels
+  mapPadding: 50, //padding to animation frame in pixels
+  legend: true,
+  legendTitle: "Legend",
+  binLabels: true,
+  binLabelOffsetX: -40,
+  binLabelOffsetY: -20,
+  binLabelFunction: function(bin) {
+    return (bin.binCount * 5).toLocaleString() + "km²";
+  }
 };
 
 let currentLayout = 0; // initial layout is 0
@@ -25,22 +36,40 @@ let currentLayout = 0; // initial layout is 0
 /**
  * Main function to use when creating a animation
  */
-function reglMapAnimation(animationOptions) {
+export function animate(animationOptions) {
   /*   constructor(options = {}) { */
-  options = Object.assign({}, animationOptions);
+  let options = Object.assign({}, animationOptions);
 
   // initialize regl
-
   if (animationOptions.container) {
+    //clear container
+    regl.destroy();
+    while (animationOptions.container.firstChild) {
+      animationOptions.container.removeChild(
+        animationOptions.container.lastChild
+      );
+    }
     regl = require("regl")(animationOptions.container);
   } else {
     regl = require("regl")();
   }
 
   //optional parameters
+  options.container = animationOptions.container || document.body;
+  options.legend = animationOptions.legend || defaultOptions.legend;
+  options.labels = animationOptions.labels || defaultOptions.labels;
+  options.binLabelFunction =
+    animationOptions.binLabelFunction || defaultOptions.binLabelFunction;
+  options.binLabelOffsetX =
+    animationOptions.binLabelOffsetX || defaultOptions.binLabelOffsetX;
+  options.binLabelOffsetY =
+    animationOptions.binLabelOffsetY || defaultOptions.binLabelOffsetY;
+  options.legendTitle =
+    animationOptions.legendTitle || defaultOptions.legendTitle;
   options.numPoints = animationOptions.numPoints || null; //later defined as pointData.length
   options.pointWidth = animationOptions.pointWidth || defaultOptions.pointWidth;
-  options.pointMargin = animationOptions.pointMargin || defaultOptions.pointMargin;
+  options.pointMargin =
+    animationOptions.pointMargin || defaultOptions.pointMargin;
   options.duration = animationOptions.duration || defaultOptions.duration;
   options.delayAtEnd = animationOptions.delayAtEnd || defaultOptions.delayAtEnd;
   options.width = animationOptions.width || window.innerWidth;
@@ -48,7 +77,8 @@ function reglMapAnimation(animationOptions) {
   options.colors = animationOptions.colors || defaultOptions.colors;
   options.stops = animationOptions.stops || defaultOptions.stops;
   options.projection = animationOptions.projection || defaultOptions.projection;
-  options.backgroundColor = animationOptions.backgroundColor || defaultOptions.backgroundColor;
+  options.backgroundColor =
+    animationOptions.backgroundColor || defaultOptions.backgroundColor;
   options.mapPadding = animationOptions.mapPadding || defaultOptions.mapPadding;
 
   if (options.pointData) {
@@ -56,14 +86,17 @@ function reglMapAnimation(animationOptions) {
       options.numPoints = options.pointData.length;
     }
 
-    delayByIndex = 500 / options.numPoints;
-    maxDuration = options.duration + delayByIndex * options.numPoints;
+    options.delayByIndex = 500 / options.numPoints;
+    options.maxDuration =
+      options.duration + options.delayByIndex * options.numPoints;
     main(options.pointData, options);
   }
+
+  if (options.legend) addLegendToContainer(options);
 }
 
 // where the fun begins
-main = function(csvData, options) {
+function main(csvData, options) {
   // create initial set of points from csv data
   const points = d3.range(options.numPoints).map(d => ({}));
 
@@ -85,11 +118,79 @@ main = function(csvData, options) {
   const layouts = [toMap, toBars]; //order of animations
 
   // start animation loop
-  animate(layouts, points, options);
-};
+  animationLoop(layouts, points, options);
+}
+
+function addLegendToContainer(options) {
+  let padding = 10;
+  let svg = d3.create("svg");
+  svg.attr("class", "regl-animation-legend");
+
+  options.container.appendChild(svg.node());
+
+  // create a list of keys
+  let legendData = [];
+  for (let i = 0; i < options.stops.length; i++) {
+    legendData.push({
+      stop: options.stops[i],
+      color: options.colors[i],
+      index: i
+    });
+  }
+
+  // Add one dot in the legend for each name.
+  var size = 20;
+  let titleY = 10;
+  let titleYoffset = 25;
+  //title
+  svg
+    .append("text")
+    .style("fill", "black")
+    .attr("x", padding)
+    .attr("y", titleY)
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle")
+    .text(options.legendTitle);
+
+  svg
+    .selectAll("mydots")
+    .data(legendData)
+    .enter()
+    .append("rect")
+    .attr("x", padding)
+    .attr("y", function(d, i) {
+      return i * (size + 5) + titleYoffset;
+    }) // padding is where the first dot appears. 25 is the distance between dots
+    .attr("width", size)
+    .attr("height", size)
+    .style("fill", function(d) {
+      return d.color;
+    });
+
+  // Add one dot in the legend for each name.
+  svg
+    .selectAll("mylabels")
+    .data(legendData)
+    .enter()
+    .append("text")
+    .attr("x", padding + size * 1.2)
+    .attr("y", function(d, i) {
+      return i * (size + 5) + size / 2 + titleYoffset;
+    }) // padding is where the first dot appears. 25 is the distance between dots
+    .style("fill", "black")
+    .text(function(d, i) {
+      if (i !== legendData.length - 1) {
+        return d.stop + " - " + legendData[i + 1].stop;
+      } else {
+        return d.stop + " +";
+      }
+    })
+    .attr("text-anchor", "left")
+    .style("alignment-baseline", "middle");
+}
 
 // function to compile a draw points regl func
-createDrawPoints = function(points) {
+function createDrawPoints(points) {
   const drawPoints = regl({
     frag: `
 		  precision highp float;
@@ -216,10 +317,10 @@ createDrawPoints = function(points) {
   });
 
   return drawPoints;
-};
+}
 
 // function to start animation loop (note: time is in seconds)
-animate = function(layouts, points, options) {
+function animationLoop(layouts, points, options) {
   /*  console.log('animating with new layout'); */
   // make previous end the new beginning
   points.forEach(d => {
@@ -232,7 +333,7 @@ animate = function(layouts, points, options) {
   layouts[currentLayout](points);
 
   //change point width according to layout
-  pointWidth = options.pointWidth;
+  let pointWidth = options.pointWidth;
 
   // copy layout x y to end positions
   points.forEach((d, i) => {
@@ -269,12 +370,15 @@ animate = function(layouts, points, options) {
       stageHeight: options.height,
       duration: options.duration,
       numPoints: options.numPoints,
-      delayByIndex,
+      delayByIndex: options.delayByIndex,
       startTime
     });
 
     // if we have exceeded the maximum duration, move on to the next animation
-    if (time - startTime > maxDuration / 1000 + options.delayAtEnd) {
+    if (
+      time - startTime >
+      options.maxDuration / 1000 + options.delayAtEnd / 1000
+    ) {
       /*     console.log('done animating, moving to next layout'); */
 
       frameLoop.cancel();
@@ -289,12 +393,13 @@ animate = function(layouts, points, options) {
         });
       } */
 
-      animate(layouts, points, options);
+      animationLoop(layouts, points, options);
     }
   });
-};
+}
 
-mapLayout = (points, csvData, options) => {
+function mapLayout(points, csvData, options) {
+  hideLabels();
   function projectData(data) {
     var yExtent = d3.extent(csvData, function(d) {
       return parseInt(d.y);
@@ -310,8 +415,10 @@ mapLayout = (points, csvData, options) => {
       ]
     };
     if (options.projection == "EPSG:4326") {
-      var projection = d3.geoMercator().fitSize([options.width, options.height], extentGeoJson);
-    } else if (options.projection == "EPSG:3035") {
+      var projection = d3
+        .geoMercator()
+        .fitSize([options.width, options.height], extentGeoJson);
+    } else {
       /*       var projection = d3
       .geoAzimuthalEqualArea()
       .rotate([-10, -52])
@@ -335,7 +442,7 @@ mapLayout = (points, csvData, options) => {
         location = projection([point.x, point.y]);
         d.x = location[0];
         d.y = location[1];
-      } else if (options.projection == "EPSG:3035") {
+      } else {
         d.x = xScale3035(parseInt(point.x));
         d.y = yScale3035(parseInt(point.y));
       }
@@ -343,10 +450,40 @@ mapLayout = (points, csvData, options) => {
   }
   projectData(points);
   colorDataByClass(points, csvData, options);
-};
+
+  //show legend at end of transition
+  setTimeout(function() {
+    showLegend();
+  }, options.duration);
+}
+
+function hideLegend() {
+  document.getElementsByClassName("regl-animation-legend")[0].style.display =
+    "none";
+}
+function hideLabels() {
+  let labels = document.getElementsByClassName("regl-animation-label");
+  if (labels.length)
+    for (var i = 0; i < labels.length; i++) {
+      labels[i].style.display = "none";
+    }
+}
+function showLegend() {
+  if (document.getElementsByClassName("regl-animation-legend")[0])
+    document.getElementsByClassName("regl-animation-legend")[0].style.display =
+      "block";
+}
+function showLabels() {
+  let labels = document.getElementsByClassName("regl-animation-label");
+  if (labels.length)
+    for (var i = 0; i < labels.length; i++) {
+      labels[i].style.display = "block";
+    }
+}
 
 //draw bar graph by defining point x/y based on pointclass value
-barsLayout = (points, csvData, options) => {
+function barsLayout(points, csvData, options) {
+  hideLegend();
   var pointWidth = options.width / 800;
   var pointMargin = options.pointMargin;
   var byValue = d3
@@ -364,9 +501,14 @@ barsLayout = (points, csvData, options) => {
   var binMargin = options.pointWidth * 10;
   var numBins = byValue.length;
   var minBinWidth = options.width / (numBins * 2.5);
-  var totalExtraWidth = options.width - binMargin * (numBins - 1) - minBinWidth * numBins;
+  var totalExtraWidth =
+    options.width - binMargin * (numBins - 1) - minBinWidth * numBins;
   var binWidths = byValue.map(function(d) {
-    return Math.ceil((d.values.length / csvData.length) * totalExtraWidth) + minBinWidth;
+    return options.width / numBins;
+    // return (
+    //   Math.ceil((d.values.length / csvData.length) * totalExtraWidth) +
+    //   minBinWidth
+    // );
   });
   /*   console.log(binWidths); */
   var increment = options.pointWidth + options.pointMargin;
@@ -391,12 +533,15 @@ barsLayout = (points, csvData, options) => {
       return d[0];
     })
     .object(binsArray);
-  /* console.log("got bins", bins); */
+  //console.log("got bins", bins);
   colorDataByClass(points, csvData, options);
 
   var arrangement = points.map(function(d, i) {
     var value = d.class;
     var bin = bins[value];
+    //for labelling
+    bin.maxY = 0;
+
     if (!bin) {
       return {
         x: d.x,
@@ -413,6 +558,7 @@ barsLayout = (points, csvData, options) => {
     var x = binStart + col * increment;
     var y = -row * increment + options.height;
     bin.binCount += 1;
+    if (y > bin.maxY) bin.maxY = y;
     return {
       x: x,
       y: y,
@@ -423,21 +569,44 @@ barsLayout = (points, csvData, options) => {
     Object.assign(points[i], d);
   });
   /*   console.log("points[0]=", points[0]); */
-};
 
-colorDataByClass = (data, csvData, options) => {
+  //add label to the top of each bin
+  setTimeout(function() {
+    if (document.getElementsByClassName("regl-animation-label")[0]) {
+      showLabels();
+    } else {
+      binsArray.map(function(bin) {
+        let label = createLabel(bin, options);
+        options.container.appendChild(label);
+      });
+    }
+  }, options.duration);
+}
+
+function createLabel(bin, options) {
+  let div = document.createElement("div");
+  div.classList.add("regl-animation-label");
+  div.innerHTML = options.binLabelFunction(bin); //total km2
+  div.style.top = bin.maxY + options.binLabelOffsetY + "px";
+  div.style.left =
+    bin.binStart + bin.binWidth / 2 + options.binLabelOffsetX + "px";
+  div.style.position = "absolute";
+  return div;
+}
+
+function colorDataByClass(data, csvData, options) {
   data.forEach(function(d, i) {
     classifyPoint(d, csvData[i], options.colors, options.stops);
   });
-};
+}
 
-toVectorColor = colorStr => {
+function toVectorColor(colorStr) {
   var rgb = d3.rgb(colorStr);
   return [rgb.r / 255, rgb.g / 255, rgb.b / 255];
-};
+}
 // add classification value and color properties to each GLpoint using values from csv
-classifyPoint = (glPoint, csvPoint, colors, stops) => {
-  for (i = 0; i < stops.length; i++) {
+function classifyPoint(glPoint, csvPoint, colors, stops) {
+  for (let i = 0; i < stops.length; i++) {
     let stop = stops[i];
     if (i == stops.length - 1) {
       //last stop value
@@ -454,6 +623,4 @@ classifyPoint = (glPoint, csvPoint, colors, stops) => {
       }
     }
   }
-};
-
-module.exports.reglMapAnimation = reglMapAnimation;
+}

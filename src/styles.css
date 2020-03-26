@@ -1,0 +1,16 @@
+.regl-animation-legend {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  width: 150px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+.regl-animation-label {
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid black;
+  border-radius: 5px;
+}

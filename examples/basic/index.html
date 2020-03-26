@@ -7,27 +7,30 @@
     <title>Example</title>
   </head>
   <body>
-    <script src="https://unpkg.com/regl-map-animation/dist/bundle.js"></script>
+    <script src="../../build/reglmapanimation.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
       integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y="
       crossorigin="anonymous"
     ></script>
     <script>
-      d3.csv("../pop_5km.csv", d => {
+      d3.csv("../../assets/csv/pop_2011_3035_5km.csv", d => {
         return {
           value: d.value,
-          y: +d.y,
+          y: +d.y, //add removed zeros to make true EPSG3035
           x: +d.x
         };
       }).then(pointData => {
-        reglMapAnimation.reglMapAnimation({
+        ReglMapAnimation.animate({
           pointData,
-          pointWidth: 1,
-          pointMargin: 1,
-          delayAtEnd: 1,
-          colors: ["#005cff", "#55e238", "#ebff0a", "#ffce08", "#ff0f00", "#a6306f"],
-          stops: [0, 100, 1000, 5000, 10000, 30000]
+          duration: 5000,
+          delayAtEnd: 4000,
+          legend: true,
+          legendTitle: "Population per 5km²",
+          binLabels: true,
+          binLabelFunction: function(bin) {
+            return (bin.binCount * 5).toLocaleString() + "km²";
+          }
         });
       });
     </script>
