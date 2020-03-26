@@ -26,7 +26,7 @@ import { animate } from "regl-map-animation";
           legend: true,
           legendTitle: "Population per 5km²"
           binLabels:true,
-                    binLabelFunction: function(bin) {
+          binLabelFunction: function(bin) {
             return (bin.binCount * 5).toLocaleString() + "km²";
           }
         });
@@ -52,11 +52,11 @@ Then:
     binLabels: true,
     binLabelFunction: function(bin) {
       //    bin = {
-      // value: 
-      // binWidth: 
-      // binStart: 
-      // binCount: 
-      // binCols: 
+      // value //threshold value
+      // binWidth //width of the bin in pixels
+      // binStart //initial screenX value of the bin
+      // binCount //number of entities in the bin
+      // binCols //number of columns in the bin
       // }
       return (bin.binCount * 5).toLocaleString() + "km²";
     }
