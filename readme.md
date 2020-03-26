@@ -19,17 +19,17 @@ Then import:
 ```javascript
 import { animate } from "regl-map-animation";
 
-        animate({
-          pointData,
-          duration: 5000,
-          delayAtEnd: 4000,
-          legend: true,
-          legendTitle: "Population per 5km²"
-          binLabels:true,
-                    binLabelFunction: function(bin) {
-            return (bin.binCount * 5).toLocaleString() + "km²";
-          }
-        });
+animate({
+  pointData,
+  duration: 5000,
+  delayAtEnd: 4000,
+  legend: true,
+  legendTitle: "Population per 5km²"
+  binLabels: true,
+  binLabelFunction: function(bin) {
+    return (bin.binCount * 5).toLocaleString() + "km²";
+  }
+});
 ```
 
 #### Browsers
@@ -43,24 +43,24 @@ As a standalone script use:
 Then:
 
 ```javascript
- ReglMapAnimation.animate({
-    pointData,
-    duration: 5000,
-    delayAtEnd: 4000,
-    legend: true,
-    legendTitle: "Population per 5km²",
-    binLabels: true,
-    binLabelFunction: function(bin) {
-      //    bin = {
-      // value: 
-      // binWidth: 
-      // binStart: 
-      // binCount: 
-      // binCols: 
-      // }
-      return (bin.binCount * 5).toLocaleString() + "km²";
-    }
-  });
+ReglMapAnimation.animate({
+        pointData,
+        duration: 5000,
+        delayAtEnd: 4000,
+        legend: true,
+        legendTitle: "Population per 5km²",
+        binLabels: true,
+        binLabelFunction: function(bin) {
+        //    bin = {
+        // value //threshold value
+        // binWidth //width of the bin in pixels
+        // binStart //initial screenX value of the bin
+        // binCount //number of entities in the bin
+        // binCols //number of columns in the bin
+        // }
+        return (bin.binCount * 5).toLocaleString() + "km²";
+        }
+});
 ```
 
 ## Parameters
