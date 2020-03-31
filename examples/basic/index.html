@@ -7,6 +7,7 @@
     <title>Example</title>
   </head>
   <body>
+    <div id="container"></div>
     <script src="../../build/reglmapanimation.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
@@ -21,17 +22,19 @@
           x: +d.x
         };
       }).then(pointData => {
+        let width = 900;
+        let height = 900;
+        let container = document.getElementById("container");
+        container.style.height = height + "px";
+        container.style.width = width + "px";
         ReglMapAnimation.animation()
-          //.containerId("animation")
+          .container(container)
           .pointData(pointData)
-          .width(window.innerWidth)
-          .height(window.innerHeight)
-          .duration(1000)
-          .delayAtEnd(1000)
+          .width(width)
+          .height(height)
+          .duration(500)
+          .delayAtEnd(500)
           .binLabels(true)
-          .binLabelFunction(function(bin) {
-            return (bin.binCount * 5).toLocaleString() + "km²";
-          })
           .legend(true)
           .legendTitle("Population per 5 km²")
           .animate();

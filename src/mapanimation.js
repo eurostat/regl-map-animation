@@ -14,7 +14,7 @@ export function animation() {
   let out = {};
 
   out.pointData_ = null; // parsed point data [x,y,indicator]
-  out.containerId_ = null; //HTML DIV element that REGL will use to render the animation
+  out.container_ = null; //HTML DIV element that REGL will use to render the animation
   out.numPoints_ = null; // number of points to display
   out.pointWidth_ = 1; // width of each point
   out.pointMargin_ = 0; // Margin used for bar chart
@@ -23,7 +23,7 @@ export function animation() {
   out.width_ = window.innerWidth;
   out.height_ = window.innerHeight;
   out.colors_ = ["#005cff", "#55e238", "#ebff0a", "#ff0f00"];
-  out.stops_ = [0, 100, 1000, 10000];
+  out.stops_ = [1, 100, 1000, 10000];
   out.projection_ = "EPSG:3035";
   out.backgroundColor_ = [1, 1, 1, 1];
   out.mapPadding_ = 50; //padding to animation frame in pixels
@@ -31,10 +31,20 @@ export function animation() {
   out.legendTitle_ = "Legend";
   out.binLabels_ = true;
   out.binWidth_ = null;
-  out.binLabelOffsetX_ = -40;
-  out.binLabelOffsetY_ = -20;
-  out.binLabelFunction_ = function(bin) {
+  out.binTitleX = "Population";
+  out.binTitleY = "Area";
+  out.binLabelOffsetX_ = -50;
+  out.binLabelOffsetY_ = -30;
+  out.chartOffsetY_ = 60;
+  out.binYLabelFunction_ = function(bin) {
     return (bin.binCount * 5).toLocaleString() + "km²";
+  };
+  out.binXLabelFunction_ = function(bin, nextBin) {
+    if (nextBin) {
+      return bin.value + " - " + nextBin.value;
+    } else {
+      return bin.value + "+";
+    }
   };
 
   //definition of generic accessors based on the name of each parameter name
@@ -48,26 +58,31 @@ export function animation() {
       };
     })();
 
-  // initialize regl
-  if (out.containerId_) {
-    out.container_ = document.getElementById(out.containerId_);
-    regl = require("regl")(out.container_);
-  } else {
-    out.container_ = document.body;
-    regl = require("regl")();
-  }
-
   out.animate = function() {
+    //clear regl
+    if (regl) {
+      regl.destroy();
+    }
+
+    //empty container
+    if (out.container_) {
+    }
+
     main(out.pointData_);
     return out;
   };
 
   // where the fun begins
   function main(csvData) {
-    //for legend position
-    if (out.containerId_) {
+    // initialize regl
+    if (out.container_) {
       out.container_.style.position = "relative";
+      regl = require("regl")(out.container_);
+    } else {
+      out.container_ = document.body;
+      regl = require("regl")();
     }
+
     if (!out.numPoints_) {
       out.numPoints_ = out.pointData_.length;
     }
@@ -440,15 +455,24 @@ export function animation() {
 
   function hideLegend() {
     let el = document.getElementsByClassName("regl-animation-legend")[0];
-    el.classList.remove("visible");
+    if (el) {
+      el.classList.remove("visible");
+    }
     return out;
   }
   function hideLabels() {
     let labels = document.getElementsByClassName("regl-animation-label");
-    if (labels.length)
+    let titles = document.getElementsByClassName("regl-animation-chart-title");
+    if (titles.length) {
+      for (var i = 0; i < titles.length; i++) {
+        titles[i].classList.remove("visible");
+      }
+    }
+    if (labels.length) {
       for (var i = 0; i < labels.length; i++) {
         labels[i].classList.remove("visible");
       }
+    }
     return out;
   }
   function showLegend() {
@@ -460,10 +484,17 @@ export function animation() {
   }
   function showLabels() {
     let labels = document.getElementsByClassName("regl-animation-label");
-    if (labels.length)
+    let titles = document.getElementsByClassName("regl-animation-chart-title");
+    if (titles.length) {
+      for (var i = 0; i < titles.length; i++) {
+        titles[i].classList.add("visible");
+      }
+    }
+    if (labels.length) {
       for (var i = 0; i < labels.length; i++) {
         labels[i].classList.add("visible");
       }
+    }
     return out;
   }
 
@@ -493,7 +524,7 @@ export function animation() {
       if (out.binWidth_) {
         return out.binWidth_;
       } else {
-        return out.width_ / out.stops_.length;
+        return (out.width_ - binMargin * out.stops_.length) / out.stops_.length;
       }
 
       // return (
@@ -547,7 +578,7 @@ export function animation() {
       var row = Math.floor(binCount / binCols);
       var col = binCount % binCols;
       var x = binStart + col * increment;
-      var y = -row * increment + out.height_;
+      var y = -row * increment + out.height_ - out.chartOffsetY_;
       bin.binCount += 1;
       if (y > bin.maxY) bin.maxY = y;
       return {
@@ -567,10 +598,16 @@ export function animation() {
         if (document.getElementsByClassName("regl-animation-label")[0]) {
           showLabels();
         } else {
-          binsArray.map(function(bin) {
-            let label = createLabel(bin);
-            out.container_.appendChild(label);
+          binsArray.map(function(bin, i) {
+            let labelY = createLabelY(bin);
+            let labelX = createLabelX(bin, binsArray[i + 1]);
+            out.container_.appendChild(labelY);
+            out.container_.appendChild(labelX);
           });
+          let titleX = createChartTitleX();
+          let titleY = createChartTitleY();
+          out.container_.appendChild(titleX);
+          out.container_.appendChild(titleY);
           showLabels();
         }
       }, out.duration_);
@@ -578,12 +615,54 @@ export function animation() {
     return out;
   }
 
-  function createLabel(bin) {
+  // bar chart Y axis label
+  function createLabelY(bin) {
     let div = document.createElement("div");
     div.classList.add("regl-animation-label");
-    div.innerHTML = out.binLabelFunction_(bin); //total km2
+    div.innerHTML = out.binYLabelFunction_(bin); //total km2
     let labelY = bin.maxY + out.binLabelOffsetY_;
     let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
+
+    div.style.top = labelY + "px";
+    div.style.left = labelX + "px";
+    div.style.position = "absolute";
+    return div;
+  }
+
+  // bar chart X axis label
+  function createLabelX(bin, nextBin) {
+    let div = document.createElement("div");
+    div.classList.add("regl-animation-label", "regl-chart-label-x");
+    div.innerHTML = out.binXLabelFunction_(bin, nextBin); //total km2
+    let labelY = out.height_ - out.chartOffsetY_;
+    let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
+
+    div.style.top = labelY + "px";
+    div.style.left = labelX + "px";
+    div.style.position = "absolute";
+    return div;
+  }
+
+  function createChartTitleX() {
+    let div = document.createElement("div");
+    div.classList.add("regl-animation-chart-title");
+    div.innerHTML = out.binTitleX; //total km2
+    let labelY = out.height_ - out.chartOffsetY_ + 40;
+    let labelX = out.width_ / 2 - 50;
+
+    div.style.top = labelY + "px";
+    div.style.left = labelX + "px";
+    div.style.position = "absolute";
+    return div;
+  }
+
+  function createChartTitleY() {
+    let div = document.createElement("div");
+    div.id = "regl-chart-title-Y";
+    div.classList.add("regl-animation-chart-title");
+    div.innerHTML = out.binTitleY; //total km2
+    let labelY = out.height_ / 2;
+    let labelX = 10;
 
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
