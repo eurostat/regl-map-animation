@@ -21,18 +21,20 @@
           x: +d.x
         };
       }).then(pointData => {
-        ReglMapAnimation.animate({
-          pointData,
-          duration: 1000,
-          delayAtEnd: 1000,
-          legend: true,
-          legendTitle: "Population per 5km²",
-          binLabels: true,
-
-          binLabelFunction: function(bin) {
+        ReglMapAnimation.animation()
+          //.containerId("animation")
+          .pointData(pointData)
+          .width(window.innerWidth)
+          .height(window.innerHeight)
+          .duration(1000)
+          .delayAtEnd(1000)
+          .binLabels(true)
+          .binLabelFunction(function(bin) {
             return (bin.binCount * 5).toLocaleString() + "km²";
-          }
-        });
+          })
+          .legend(true)
+          .legendTitle("Population per 5 km²")
+          .animate();
       });
     </script>
   </body>

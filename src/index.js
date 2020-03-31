@@ -1,1 +1,1 @@
-export { animate } from "./mapanimation.js";
+export { animation } from "./mapanimation.js";

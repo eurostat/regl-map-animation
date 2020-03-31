@@ -17,19 +17,21 @@ Within a node.js project simply run the following command:
 Then import:
 
 ```javascript
-import { animate } from "regl-map-animation";
+import { animation } from "regl-map-animation";
 
-animate({
-  pointData,
-  duration: 5000,
-  delayAtEnd: 4000,
-  legend: true,
-  legendTitle: "Population per 5km²"
-  binLabels: true,
-  binLabelFunction: function(bin) {
-    return (bin.binCount * 5).toLocaleString() + "km²";
-  }
-});
+  ReglMapAnimation.animation()
+    .pointData(pointData)
+    .width(window.innerWidth)
+    .height(window.innerHeight)
+    .duration(1000)
+    .delayAtEnd(1000)
+    .binLabels(true)
+    .binLabelFunction(function(bin) {
+      return (bin.binCount * 5).toLocaleString() + "km²";
+    })
+    .legend(true)
+    .legendTitle("Population per 5 km²")
+    .animate();
 ```
 
 #### Browsers
@@ -43,27 +45,23 @@ As a standalone script use:
 Then:
 
 ```javascript
-ReglMapAnimation.animate({
-        pointData,
-        duration: 5000,
-        delayAtEnd: 4000,
-        legend: true,
-        legendTitle: "Population per 5km²",
-        binLabels: true,
-        binLabelFunction: function(bin) {
-        //    bin = {
-        // value //threshold value
-        // binWidth //width of the bin in pixels
-        // binStart //initial screenX value of the bin
-        // binCount //number of entities in the bin
-        // binCols //number of columns in the bin
-        // }
-        return (bin.binCount * 5).toLocaleString() + "km²";
-        }
-});
+  ReglMapAnimation.animation()
+    //.containerId("animation")
+    .pointData(pointData)
+    .width(window.innerWidth)
+    .height(window.innerHeight)
+    .duration(1000)
+    .delayAtEnd(1000)
+    .binLabels(true)
+    .binLabelFunction(function(bin) {
+      return (bin.binCount * 5).toLocaleString() + "km²";
+    })
+    .legend(true)
+    .legendTitle("Population per 5 km²")
+    .animate();
 ```
 
-## Parameters
+## Methods
 
 | Name            | Description                                                                                                                     | Type                                    | Required | Default            |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------- | ------------------ |
@@ -80,6 +78,7 @@ ReglMapAnimation.animate({
 | projection      | Spatial reference of the points x and y values. Accepted values are "EPSG:3035" or "EPSG:4326"                                  | string                                  | False    | "EPSG:3035"        |
 | mapPadding      | Add padding (in pixels) to the map animation                                                                                    | number                                  | False    |
 | backgroundColor | Sets the container's background colour (WebGL RGBA array of values from 0 to 1)                                                 | [number,number,number,number]           | False    | [1,1,1,1] (white)  |
+
 ## Notes
 
 Inspired by [Peter Beshai](https://peterbeshai.com/) and adapted from his [excellent tutorial](https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/) on regl.
