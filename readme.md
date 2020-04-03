@@ -20,18 +20,17 @@ Then import:
 import { animation } from "regl-map-animation";
 
   ReglMapAnimation.animation()
+    .container(container)
     .pointData(pointData)
-    .width(window.innerWidth)
-    .height(window.innerHeight)
-    .duration(1000)
-    .delayAtEnd(1000)
+    .width(width)
+    .height(height)
+    .duration(500)
+    .delayAtEnd(500)
     .binLabels(true)
-    .binLabelFunction(function(bin) {
-      return (bin.binCount * 5).toLocaleString() + "km²";
-    })
     .legend(true)
     .legendTitle("Population per 5 km²")
     .animate();
+});
 ```
 
 #### Browsers
@@ -46,19 +45,17 @@ Then:
 
 ```javascript
   ReglMapAnimation.animation()
-    //.containerId("animation")
+    .container(container)
     .pointData(pointData)
-    .width(window.innerWidth)
-    .height(window.innerHeight)
-    .duration(1000)
-    .delayAtEnd(1000)
+    .width(width)
+    .height(height)
+    .duration(500)
+    .delayAtEnd(500)
     .binLabels(true)
-    .binLabelFunction(function(bin) {
-      return (bin.binCount * 5).toLocaleString() + "km²";
-    })
     .legend(true)
     .legendTitle("Population per 5 km²")
     .animate();
+});
 ```
 
 ## Methods
