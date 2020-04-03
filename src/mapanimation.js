@@ -35,9 +35,11 @@ export function animation() {
   out.binTitleY = "Area";
   out.binLabelOffsetX_ = -50;
   out.binLabelOffsetY_ = -30;
-  out.chartOffsetY_ = 60;
+  out.chartOffsetY_ = 70;
   out.binYLabelFunction_ = function(bin) {
-    return (bin.binCount * 5).toLocaleString() + "km²";
+    return (
+      (bin.binCount * 5).toLocaleString("en").replace("/,/gi", " ") + "km²"
+    );
   };
   out.binXLabelFunction_ = function(bin, nextBin) {
     if (nextBin) {
