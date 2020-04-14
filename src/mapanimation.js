@@ -33,34 +33,44 @@ export function animation() {
   out.binWidth_ = null;
   out.binTitleX = "Population";
   out.binTitleY = "Area";
-  out.binLabelOffsetX_ = -50;
+  out.binLabelOffsetX_ = 20;
   out.binLabelOffsetY_ = -30;
-  out.chartOffsetY_ = 70;
-  out.binYLabelFunction_ = function(bin) {
+  out.chartOffsetX_ = 70;
+  out.chartOffsetY_ = -50;
+  out.binYLabelFunction_ = function (bin) {
     return (
-      (bin.binCount * 5).toLocaleString("en").replace("/,/gi", " ") + "km²"
+      formatStr(bin.binCount * 5) + "km²"
+
     );
   };
-  out.binXLabelFunction_ = function(bin, nextBin) {
-    if (nextBin) {
-      return bin.value + " - " + nextBin.value;
+  out.binXLabelFunction_ = function (bin, nextBin) {
+    if (bin.value == 0) {
+      return "0"
     } else {
-      return bin.value + "+";
+      if (nextBin) {
+        return formatStr(bin.value) + " - " + formatStr(nextBin.value);
+      } else {
+        return formatStr(bin.value) + "+";
+      }
     }
   };
+  //functions for user to define
+  out.frameFunction_ = null;
+  out.endFunction_ = null;
+  out.initFunction_ = null;
 
   //definition of generic accessors based on the name of each parameter name
   for (var p in out)
-    (function() {
+    (function () {
       var p_ = p;
-      out[p_.substring(0, p_.length - 1)] = function(v) {
+      out[p_.substring(0, p_.length - 1)] = function (v) {
         if (!arguments.length) return out[p_];
         out[p_] = v;
         return out;
       };
     })();
 
-  out.animate = function() {
+  out.animate = function () {
     //clear regl
     if (regl) {
       regl.destroy();
@@ -115,6 +125,10 @@ export function animation() {
 
     // start animation loop
     animationLoop(layouts, points);
+    if (out.initFunction_) {
+      let canvas = out.container_.childNodes[0];
+      out.initFunction_(canvas);
+    }
   }
 
   function addLegendToContainer() {
@@ -154,12 +168,12 @@ export function animation() {
       .enter()
       .append("rect")
       .attr("x", padding)
-      .attr("y", function(d, i) {
+      .attr("y", function (d, i) {
         return i * (size + 5) + titleYoffset;
       }) // padding is where the first dot appears. 25 is the distance between dots
       .attr("width", size)
       .attr("height", size)
-      .style("fill", function(d) {
+      .style("fill", function (d) {
         return d.color;
       });
 
@@ -170,21 +184,28 @@ export function animation() {
       .enter()
       .append("text")
       .attr("x", padding + size * 1.2)
-      .attr("y", function(d, i) {
+      .attr("y", function (d, i) {
         return i * (size + 5) + size / 2 + titleYoffset;
       }) // padding is where the first dot appears. 25 is the distance between dots
       .style("fill", "black")
-      .text(function(d, i) {
+      .text(function (d, i) {
         if (i !== legendData.length - 1) {
-          return d.stop + " - " + legendData[i + 1].stop;
+          if (d.stop == 0) {
+            return formatStr(d.stop)
+          }
+          return formatStr(d.stop) + " - " + formatStr(legendData[i + 1].stop)
         } else {
-          return d.stop + " +";
+          return formatStr(d.stop) + " +";
         }
       })
       .attr("text-anchor", "left")
       .style("alignment-baseline", "middle");
 
     return out;
+  }
+
+  function formatStr(s) {
+    return s.toLocaleString("en").replace(/,/gi, " ");
   }
 
   // function to compile a draw points regl func
@@ -372,6 +393,13 @@ export function animation() {
         startTime
       });
 
+      //run user-defined render function
+      if (out.frameFunction_) {
+        let canvas = out.container_.childNodes[0];
+        out.frameFunction_(canvas);
+      }
+
+
       // if we have exceeded the maximum duration, move on to the next animation
       if (time - startTime > out.maxDuration / 1000 + out.delayAtEnd_ / 1000) {
         /*     console.log('done animating, moving to next layout'); */
@@ -388,7 +416,17 @@ export function animation() {
         });
       } */
 
-        animationLoop(layouts, points);
+        //endFunction & stop animation
+        if (currentLayout === 0 && out.endFunction_) {
+          if (out.endFunction_) {
+            let canvas = out.container_.childNodes[0];
+            out.endFunction_(canvas);
+            regl.destroy();
+          }
+        } else {
+          animationLoop(layouts, points);
+        }
+
       }
     });
     return out;
@@ -397,10 +435,10 @@ export function animation() {
   function mapLayout(points, csvData) {
     hideLabels();
     function projectData(data) {
-      var yExtent = d3.extent(csvData, function(d) {
+      var yExtent = d3.extent(csvData, function (d) {
         return parseInt(d.y);
       });
-      var xExtent = d3.extent(csvData, function(d) {
+      var xExtent = d3.extent(csvData, function (d) {
         return parseInt(d.x);
       });
       var extentGeoJson = {
@@ -431,7 +469,7 @@ export function animation() {
           .range([out.height_ - out.mapPadding_, 0 + out.mapPadding_]); // unit: pixels
       }
 
-      data.forEach(function(d, i) {
+      data.forEach(function (d, i) {
         var point = csvData[i];
         let location;
         if (out.projection_ == "EPSG:4326") {
@@ -448,7 +486,7 @@ export function animation() {
     colorDataByClass(points, csvData);
 
     //show legend at end of transition
-    setTimeout(function() {
+    setTimeout(function () {
       showLegend();
     }, out.duration_);
 
@@ -507,26 +545,27 @@ export function animation() {
     var pointMargin = out.pointMargin_;
     var byValue = d3
       .nest()
-      .key(function(d) {
+      .key(function (d) {
         return d.class;
       })
       .entries(points)
-      .filter(function(d) {
+      .filter(function (d) {
         return d.values.length > 10;
       })
-      .sort(function(x, y) {
+      .sort(function (x, y) {
         return d3.ascending(x.key, y.key);
       });
     var binMargin = out.pointWidth_ * 10;
+    let containerWidth = out.width_ - out.chartOffsetX_;
     var numBins = byValue.length;
     var minBinWidth = out.width_ / (numBins * 2.5);
     var totalExtraWidth =
       out.width_ - binMargin * (numBins - 1) - minBinWidth * numBins;
-    var binWidths = byValue.map(function(d) {
+    var binWidths = byValue.map(function (d) {
       if (out.binWidth_) {
         return out.binWidth_;
       } else {
-        return (out.width_ - binMargin * out.stops_.length) / out.stops_.length;
+        return (containerWidth - binMargin * out.stops_.length) / out.stops_.length;
       }
 
       // return (
@@ -537,7 +576,7 @@ export function animation() {
     /*   console.log(binWidths); */
     var increment = out.pointWidth_ + out.pointMargin_;
     var cumulativeBinWidth = 0;
-    var binsArray = binWidths.map(function(binWidth, i) {
+    var binsArray = binWidths.map(function (binWidth, i) {
       var bin = {
         value: byValue[i].key,
         binWidth: binWidth,
@@ -550,17 +589,17 @@ export function animation() {
     });
     var bins = d3
       .nest()
-      .key(function(d) {
+      .key(function (d) {
         return d.value;
       })
-      .rollup(function(d) {
+      .rollup(function (d) {
         return d[0];
       })
       .object(binsArray);
     //console.log("got bins", bins);
     colorDataByClass(points, csvData);
 
-    var arrangement = points.map(function(d, i) {
+    var arrangement = points.map(function (d, i) {
       var value = d.class;
       var bin = bins[value];
       //for labelling
@@ -575,12 +614,12 @@ export function animation() {
       }
       var binWidth = bin.binWidth;
       var binCount = bin.binCount;
-      var binStart = bin.binStart;
+      var binStart = bin.binStart + out.chartOffsetX_;
       var binCols = bin.binCols;
       var row = Math.floor(binCount / binCols);
       var col = binCount % binCols;
-      var x = binStart + col * increment;
-      var y = -row * increment + out.height_ - out.chartOffsetY_;
+      var x = (binStart + col * increment);
+      var y = -row * increment + out.height_ + out.chartOffsetY_;
       bin.binCount += 1;
       if (y > bin.maxY) bin.maxY = y;
       return {
@@ -589,18 +628,18 @@ export function animation() {
         color: d.color
       };
     });
-    arrangement.forEach(function(d, i) {
+    arrangement.forEach(function (d, i) {
       Object.assign(points[i], d);
     });
     /*   console.log("points[0]=", points[0]); */
 
     //add label to the top of each bin
     if (out.binLabels_) {
-      setTimeout(function() {
+      setTimeout(function () {
         if (document.getElementsByClassName("regl-animation-label")[0]) {
           showLabels();
         } else {
-          binsArray.map(function(bin, i) {
+          binsArray.map(function (bin, i) {
             let labelY = createLabelY(bin);
             let labelX = createLabelX(bin, binsArray[i + 1]);
             out.container_.appendChild(labelY);
@@ -636,7 +675,7 @@ export function animation() {
     let div = document.createElement("div");
     div.classList.add("regl-animation-label", "regl-chart-label-x");
     div.innerHTML = out.binXLabelFunction_(bin, nextBin); //total km2
-    let labelY = out.height_ - out.chartOffsetY_;
+    let labelY = out.height_ + out.chartOffsetY_;
     let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
 
     div.style.top = labelY + "px";
@@ -649,7 +688,7 @@ export function animation() {
     let div = document.createElement("div");
     div.classList.add("regl-animation-chart-title");
     div.innerHTML = out.binTitleX; //total km2
-    let labelY = out.height_ - out.chartOffsetY_ + 40;
+    let labelY = out.height_ + out.chartOffsetY_ + 40;
     let labelX = out.width_ / 2 - 50;
 
     div.style.top = labelY + "px";
@@ -673,7 +712,7 @@ export function animation() {
   }
 
   function colorDataByClass(data, csvData) {
-    data.forEach(function(d, i) {
+    data.forEach(function (d, i) {
       classifyPoint(d, csvData[i], out.colors_, out.stops_);
     });
     return out;
@@ -685,6 +724,7 @@ export function animation() {
   }
   // add classification value and color properties to each GLpoint using values from csv
   function classifyPoint(glPoint, csvPoint, colors, stops) {
+
     for (let i = 0; i < stops.length; i++) {
       let stop = stops[i];
       if (i == stops.length - 1) {
@@ -701,6 +741,9 @@ export function animation() {
           break;
         }
       }
+    }
+    if (!glPoint.color) {
+      glPoint.color = toVectorColor("grey")
     }
   }
 

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Example</title>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script src="../../build/reglmapanimation.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
+    integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y=" crossorigin="anonymous"></script>
+  <script src="../../assets/js/CCapture.all.min.js"></script>
+  <script>
+    // Create a capturer that exports an animated GIF
+    // Notices you have to specify the path to the gif.worker.js 
+    var capturer = new CCapture({
+      format: 'webm', //gif / webm,
+      workersPath: '../../assets/js/',
+      //format: "webm",
+      framerate: 30,
+      name: "population_animation",
+      quality: 50
+    });
+
+
+    d3.csv("../../assets/csv/pop_grid_5km.csv", d => {
+      return {
+        value: d.value,
+        y: +d.y, //add removed zeros to make true EPSG3035
+        x: +d.x
+      };
+    }).then(pointData => {
+      let width = 900;
+      let height = 700;
+      let container = document.getElementById("container");
+      container.style.height = height + "px";
+      container.style.width = width + "px";
+
+      //init animation
+      let anim = ReglMapAnimation.animation()
+        .container(container)
+        .pointData(pointData)
+        .width(width)
+        .height(height)
+        .colors(["#000000", "#005cff", "#55e238", "#ebff0a", "#ff0f00"])
+        .stops([0, 1, 100, 1000, 10000])
+        .duration(5000)
+        .delayAtEnd(1000)
+        .binLabels(true)
+        .legend(true)
+        .legendTitle("Population per 5 km²")
+        .initFunction(function () {
+          // //initialize ccapture.js gif recording
+          capturer.start(container);
+        })
+        .frameFunction(function (canvas) {
+          //   // rendering stuff ...
+          capturer.capture(canvas)
+        })
+        .endFunction(function (canvas) {
+          capturer.stop()
+          // default save, will download automatically a file called {name}.extension (webm/gif/tar)
+          capturer.save();
+        })
+        .animate();
+    });
+
+  </script>
+</body>
+
+</html>
