@@ -31,6 +31,7 @@ export function animation() {
   out.legendTitle_ = "Legend";
   out.binLabels_ = true;
   out.binWidth_ = null;
+  out.binMargin_ = null;
   out.binTitleX = "Population";
   out.binTitleY = "Area";
   out.binLabelOffsetX_ = 20;
@@ -421,6 +422,7 @@ export function animation() {
           if (out.endFunction_) {
             let canvas = out.container_.childNodes[0];
             out.endFunction_(canvas);
+            frameLoop.cancel();
             regl.destroy();
           }
         } else {
@@ -555,17 +557,19 @@ export function animation() {
       .sort(function (x, y) {
         return d3.ascending(x.key, y.key);
       });
-    var binMargin = out.pointWidth_ * 10;
+    if (out.binMargin_) {
+      out.binMargin_ = out.pointWidth_ * 10;
+    }
     let containerWidth = out.width_ - out.chartOffsetX_;
     var numBins = byValue.length;
     var minBinWidth = out.width_ / (numBins * 2.5);
     var totalExtraWidth =
-      out.width_ - binMargin * (numBins - 1) - minBinWidth * numBins;
+      out.width_ - out.binMargin_ * (numBins - 1) - minBinWidth * numBins;
     var binWidths = byValue.map(function (d) {
       if (out.binWidth_) {
         return out.binWidth_;
       } else {
-        return (containerWidth - binMargin * out.stops_.length) / out.stops_.length;
+        return (containerWidth - out.binMargin_ * out.stops_.length) / out.stops_.length;
       }
 
       // return (
@@ -580,7 +584,7 @@ export function animation() {
       var bin = {
         value: byValue[i].key,
         binWidth: binWidth,
-        binStart: cumulativeBinWidth + i * binMargin,
+        binStart: cumulativeBinWidth + i * out.binMargin_,
         binCount: 0,
         binCols: Math.floor(binWidth / increment)
       };
