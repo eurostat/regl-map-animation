@@ -5,6 +5,7 @@ import "./styles.css";
 import { legendColor } from "d3-svg-legend";
 
 var regl = null;
+let recording = false;
 
 /**
  * Main function to use when creating a animation
@@ -398,6 +399,7 @@ export function animation() {
       if (out.frameFunction_) {
         let canvas = out.container_.childNodes[0];
         out.frameFunction_(canvas);
+        recording = true;
       }
 
 
@@ -417,13 +419,16 @@ export function animation() {
         });
       } */
 
+
         //endFunction & stop animation
         if (currentLayout === 0 && out.endFunction_) {
           if (out.endFunction_) {
             let canvas = out.container_.childNodes[0];
             out.endFunction_(canvas);
+            recording = false;
             frameLoop.cancel();
             regl.destroy();
+            animationLoop = function () { return; }
           }
         } else {
           animationLoop(layouts, points);
