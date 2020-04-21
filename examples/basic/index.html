@@ -31,14 +31,16 @@
         .pointData(pointData)
         .width(width)
         .height(height)
-        .colors(["#2d50a0", "#6487c3", "#f0cd91", "#e6a532", "#d76e2d"])
+        .colors(["#2d50a0", "rgb(73, 108, 178)", "#6487c3", "rgb(142, 156, 180)", "#f0cd91", "rgb(235, 185, 98)", "#e6a532", "rgb(223, 138, 48)", "#d76e2d"])
         //.colors(["#000000", "#005cff", "#55e238", "#ebff0a", "#ff0f00"])
-        .stops([0, 1, 100, 1000, 10000])
+        .stops([0, 1, 50, 100, 500, 1000, 2000, 5000, 10000])
         .duration(3000)
-        .delayAtEnd(0)
+        .delayAtEnd(4000)
         .binLabels(true)
         .legend(true)
+        .legendHeight(250)
         .legendTitle("Population per 5 km²")
+        .binLabelOffsetX(30)
         .animate();
     });
   </script>

@@ -30,6 +30,7 @@ export function animation() {
   out.mapPadding_ = 50; //padding to animation frame in pixels
   out.legend_ = true;
   out.legendTitle_ = "Legend";
+  out.legendHeight_ = null;
   out.binLabels_ = true;
   out.binWidth_ = null;
   out.binMargin_ = null;
@@ -137,7 +138,9 @@ export function animation() {
     let padding = 10;
     let svg = d3.create("svg");
     svg.attr("class", "regl-animation-legend");
-
+    if (out.legendHeight_) {
+      svg.style("height", out.legendHeight_);
+    }
     out.container_.appendChild(svg.node());
 
     // create a list of keys
@@ -556,11 +559,11 @@ export function animation() {
         return d.class;
       })
       .entries(points)
-      .filter(function (d) {
-        return d.values.length > 10;
-      })
+      // .filter(function (d) {
+      //   return d.values.length > 10;
+      // })
       .sort(function (x, y) {
-        return d3.ascending(x.key, y.key);
+        return d3.ascending(parseInt(x.key), parseInt(y.key));
       });
     if (out.binMargin_) {
       out.binMargin_ = out.pointWidth_ * 10;
