@@ -153,7 +153,7 @@ export function animation() {
       });
     }
 
-    // Add one dot in the legend for each name.
+    // Add one square in the legend for each name.
     var size = 20;
     let titleY = 10;
     let titleYoffset = 25;
@@ -175,14 +175,14 @@ export function animation() {
       .attr("x", padding)
       .attr("y", function (d, i) {
         return i * (size + 5) + titleYoffset;
-      }) // padding is where the first dot appears. 25 is the distance between dots
+      }) // padding is where the first square appears. 25 is the distance between squares
       .attr("width", size)
       .attr("height", size)
       .style("fill", function (d) {
         return d.color;
       });
 
-    // Add one dot in the legend for each name.
+    // Add one label in the legend for each name.
     svg
       .selectAll("mylabels")
       .data(legendData)
@@ -191,7 +191,7 @@ export function animation() {
       .attr("x", padding + size * 1.2)
       .attr("y", function (d, i) {
         return i * (size + 5) + size / 2 + titleYoffset;
-      }) // padding is where the first dot appears. 25 is the distance between dots
+      }) // padding is where the first label appears. 25 is the distance between labels
       .style("fill", "black")
       .text(function (d, i) {
         if (i !== legendData.length - 1) {

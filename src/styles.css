@@ -3,7 +3,7 @@
   opacity: 0;
   transition: visibility 0.8s, opacity 0.8s linear;
   position: absolute;
-  bottom: 5px;
+  top: 5px;
   left: 5px;
   width: 170px;
   padding: 5px;
