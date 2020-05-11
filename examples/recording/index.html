@@ -21,10 +21,10 @@
     // Create a capturer that exports an animated GIF
     // Notices you have to specify the path to the gif.worker.js 
     var capturer = new CCapture({
-      format: 'gif', //webm/gif/png/jpg/ffmpegserver
+      format: 'webm', //webm/gif/png/jpg/ffmpegserver
       workersPath: '../../assets/js/',
       //format: "webm",
-      framerate: 15,
+      framerate: 60,
       name: "mp4_15FPS_QUAL1",
       quality: 1,
       onProgress: progressFunc
@@ -41,8 +41,8 @@
         x: +d.x
       };
     }).then(pointData => {
-      let width = 600;
-      let height = 500;
+      let width = 900;
+      let height = 700;
       let container = document.getElementById("container");
       container.style.height = height + "px";
       container.style.width = width + "px";
@@ -53,17 +53,25 @@
         .pointData(pointData)
         .width(width)
         .height(height)
-        .colors(["#2d50a0", "#6487c3", "#f0cd91", "#e6a532", "#d76e2d"])
-        //.colors(["#000000", "#005cff", "#55e238", "#ebff0a", "#ff0f00"])
-        .stops([0, 1, 100, 1000, 10000])
+        .colors([
+          //"#2d50a0",
+          "#00227a",
+          "#6487c3",
+          "rgb(142, 156, 180)",
+          "#f0cd91",
+          "rgb(235, 185, 98)",
+          "#e6a532",
+          "rgb(223, 138, 48)",
+          "#d76e2d"
+        ])
+        .stops([0, 1, 250, 750, 1500, 3000, 7500, 25000])
         .duration(2000)
         .delayAtEnd(500)
         .binLabels(true)
         .legend(true)
         .legendTitle("Population per 5 km²")
         .binMargin(0)
-        .binLabelOffsetX(0).binLabelOffsetY(0)
-        .chartOffsetX(0).chartOffsetY(0)
+        .binLabelOffsetX(30)
         .initFunction(function () {
           // //initialize ccapture.js gif recording
           capturer.start(container);

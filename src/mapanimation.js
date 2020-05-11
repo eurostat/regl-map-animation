@@ -30,7 +30,7 @@ export function animation() {
   out.mapPadding_ = 50; //padding to animation frame in pixels
   out.legend_ = true;
   out.legendTitle_ = "Legend";
-  out.legendHeight_ = null;
+  out.legendHeight_ = 250;
   out.binLabels_ = true;
   out.binWidth_ = null;
   out.binMargin_ = null;
@@ -113,11 +113,27 @@ export function animation() {
     const toMap = points => mapLayout(points, csvData);
     const toBars = points => barsLayout(points, csvData);
 
-    // initial points start from random
+    //add colour
     colorDataByClass(points, csvData);
+
+    // initial points starting positions
     points.forEach((d, i) => {
-      var posx = Math.floor(Math.random() * out.width_);
-      var posy = Math.floor(Math.random() * out.height_);
+      //random
+      // var posx = Math.floor(Math.random() * out.width_);
+      // var posy = Math.floor(Math.random() * out.height_);
+
+      //circle
+      let u = i / csvData.length;
+      let angle = u * Math.PI * 2.0; // goes from 0 to 2PI
+      let radius = 100;
+      var posx = ((Math.sin(angle) * radius) + out.width_ / 2);
+      var posy = ((Math.cos(angle) * radius) + out.height_ / 2);
+
+      //geographic
+      // var posx = csvData[i].x;
+      // var posy = csvData[i].y;
+
+
       d.tx = posx;
       d.ty = posy;
       d.colorEnd = d.color;
@@ -128,6 +144,8 @@ export function animation() {
 
     // start animation loop
     animationLoop(layouts, points);
+
+    //for recording purposes
     if (out.initFunction_) {
       let canvas = out.container_.childNodes[0];
       out.initFunction_(canvas);
@@ -344,6 +362,7 @@ export function animation() {
   }
 
   // function to start animation loop (note: time is in seconds)
+  let loopsCompleted = 0;
   function animationLoop(layouts, points) {
     /*  console.log('animating with new layout'); */
     // make previous end the new beginning
@@ -422,16 +441,21 @@ export function animation() {
         });
       } */
 
+        loopsCompleted++;
 
         //endFunction & stop animation
-        if (currentLayout === 0 && out.endFunction_) {
+        if (loopsCompleted === 3) {
           if (out.endFunction_) {
-            let canvas = out.container_.childNodes[0];
-            out.endFunction_(canvas);
-            recording = false;
-            frameLoop.cancel();
-            regl.destroy();
-            animationLoop = function () { return; }
+            if (out.endFunction_) {
+              let canvas = out.container_.childNodes[0];
+              out.endFunction_(canvas);
+              recording = false;
+              frameLoop.cancel();
+              regl.destroy();
+              animationLoop = function () { return; }
+            }
+          } else {
+            animationLoop(layouts, points);
           }
         } else {
           animationLoop(layouts, points);
