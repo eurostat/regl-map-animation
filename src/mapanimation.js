@@ -42,7 +42,7 @@ export function animation() {
   out.chartOffsetY_ = -50;
   out.binYLabelFunction_ = function (bin) {
     return (
-      formatStr(bin.binCount * 5) + "km²"
+      formatStr(bin.binCount * 5) + " km²"
 
     );
   };
@@ -104,6 +104,7 @@ export function animation() {
     out.delayByIndex = 500 / out.numPoints_;
     out.maxDuration = out.duration_ + out.delayByIndex * out.numPoints_;
 
+    //add legend
     if (out.legend_) addLegendToContainer(out);
 
     // create initial set of points from csv data
