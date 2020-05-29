@@ -51,9 +51,9 @@ export function animation() {
       return "0"
     } else {
       if (nextBin) {
-        return formatStr(bin.value) + " - " + formatStr(nextBin.value);
+        return formatStr(parseInt(bin.value)) + " - " + formatStr(parseInt(nextBin.value));
       } else {
-        return formatStr(bin.value) + "+";
+        return formatStr(parseInt(bin.value)) + "+";
       }
     }
   };
@@ -81,6 +81,7 @@ export function animation() {
 
     //empty container
     if (out.container_) {
+      out.container_.classList.add("map-animation-container")
     }
 
     main(out.pointData_);
@@ -748,10 +749,21 @@ export function animation() {
     return div;
   }
 
+  let stats = {
+    0: 0,
+    1: 0,
+    250: 0,
+    750: 0,
+    1500: 0,
+    3000: 0,
+    7500: 0,
+    25000: 0
+  }
   function colorDataByClass(data, csvData) {
     data.forEach(function (d, i) {
       classifyPoint(d, csvData[i], out.colors_, out.stops_);
     });
+    console.log(stats);
     return out;
   }
 
@@ -769,12 +781,14 @@ export function animation() {
         if (csvPoint.value >= stop) {
           glPoint.color = toVectorColor(colors[i]);
           glPoint.class = stop;
+          stats[stop] = stats[stop] + 1;
           break;
         }
       } else {
         if (csvPoint.value >= stop && csvPoint.value < stops[i + 1]) {
           glPoint.color = toVectorColor(colors[i]);
           glPoint.class = stop;
+          stats[stop] = stats[stop] + 1;
           break;
         }
       }
