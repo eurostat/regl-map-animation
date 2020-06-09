@@ -34,11 +34,13 @@ export function animation() {
   out.binLabels_ = true;
   out.binWidth_ = null;
   out.binMargin_ = null;
-  out.binTitleX = "Population";
-  out.binTitleY = "Area";
-  out.binLabelOffsetX_ = 20;
+  out.xAxisTitle_ = "Population";
+  out.yAxisTitle_ = "Area";
+  out.xAxisTitleOffsetX_ = -250;
+  out.yAxisTitleOffsetX_ = -50;
+  out.binLabelOffsetX_ = 40;
   out.binLabelOffsetY_ = -30;
-  out.chartOffsetX_ = 70;
+  out.chartOffsetX_ = 100;
   out.chartOffsetY_ = -50;
   out.binYLabelFunction_ = function (bin) {
     return (
@@ -51,9 +53,9 @@ export function animation() {
       return "0"
     } else {
       if (nextBin) {
-        return formatStr(parseInt(bin.value)) + " - " + formatStr(parseInt(nextBin.value));
+        return formatStr(parseInt(bin.value)) + " to " + formatStr(parseInt(nextBin.value));
       } else {
-        return formatStr(parseInt(bin.value)) + "+";
+        return "≥ " + formatStr(parseInt(bin.value));
       }
     }
   };
@@ -218,9 +220,9 @@ export function animation() {
           if (d.stop == 0) {
             return formatStr(d.stop)
           }
-          return formatStr(d.stop) + " - " + formatStr(legendData[i + 1].stop)
+          return formatStr(d.stop) + " to " + formatStr(legendData[i + 1].stop)
         } else {
-          return formatStr(d.stop) + " +";
+          return "≥ " + formatStr(d.stop);
         }
       })
       .attr("text-anchor", "left")
@@ -700,7 +702,7 @@ export function animation() {
     div.classList.add("regl-animation-label");
     div.innerHTML = out.binYLabelFunction_(bin); //total km2
     let labelY = bin.maxY + out.binLabelOffsetY_;
-    let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
+    let labelX = (bin.binStart + bin.binWidth / 2) + out.binLabelOffsetX_;
 
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
@@ -714,7 +716,13 @@ export function animation() {
     div.classList.add("regl-animation-label", "regl-chart-label-x");
     div.innerHTML = out.binXLabelFunction_(bin, nextBin); //total km2
     let labelY = out.height_ + out.chartOffsetY_;
-    let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
+    let labelX;
+    if (nextBin) {
+      labelX = (bin.binStart + bin.binWidth / 2) + out.binLabelOffsetX_;
+    } else {
+      labelX = (bin.binStart + bin.binWidth / 2) + out.binLabelOffsetX_ + 10;
+    }
+
 
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
@@ -725,9 +733,9 @@ export function animation() {
   function createChartTitleX() {
     let div = document.createElement("div");
     div.classList.add("regl-animation-chart-title");
-    div.innerHTML = out.binTitleX; //total km2
+    div.innerHTML = out.xAxisTitle_; //total km2
     let labelY = out.height_ + out.chartOffsetY_ + 40;
-    let labelX = out.width_ / 2 - 50;
+    let labelX = out.width_ / 2 + out.xAxisTitleOffsetX_;
 
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
@@ -739,9 +747,9 @@ export function animation() {
     let div = document.createElement("div");
     div.id = "regl-chart-title-Y";
     div.classList.add("regl-animation-chart-title");
-    div.innerHTML = out.binTitleY; //total km2
+    div.innerHTML = out.yAxisTitle_; //total km2
     let labelY = out.height_ / 2;
-    let labelX = 10;
+    let labelX = out.yAxisTitleOffsetX_;
 
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
