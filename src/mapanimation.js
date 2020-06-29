@@ -44,7 +44,7 @@ export function animation() {
   out.chartOffsetY_ = -50;
   out.binYLabelFunction_ = function (bin) {
     return (
-      formatStr(bin.binCount * 5) + " km²"
+      formatStr(Math.round((bin.binCount * 25) / 1000) * 1000) + " km²"
 
     );
   };
