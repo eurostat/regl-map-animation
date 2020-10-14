@@ -12,7 +12,7 @@ Animate x/y point data using [regl](https://github.com/regl-project/regl) and ca
 
 The project is built using UMD so it works both in browsers and in node.js
 
-#### Node
+#### Node.js
 
 Within a node.js project simply run the following command:
 
