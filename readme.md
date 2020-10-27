@@ -1,5 +1,8 @@
 # regl-map-animation
 
+![npm bundle size](https://img.shields.io/bundlephobia/min/regl-map-animation)
+![npm](https://img.shields.io/npm/v/regl-map-animation)
+
 <div>
 <img src="assets/images/optimized.gif" alt="preview"/>
 <div>
