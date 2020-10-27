@@ -2,6 +2,7 @@
 
 ![npm bundle size](https://img.shields.io/bundlephobia/min/regl-map-animation)
 ![npm](https://img.shields.io/npm/v/regl-map-animation)
+![license](https://img.shields.io/badge/license-EUPL-success)
 
 <div>
 <img src="assets/images/optimized.gif" alt="preview"/>
