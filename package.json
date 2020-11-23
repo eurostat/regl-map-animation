@@ -26,7 +26,7 @@
     "webgl"
   ],
   "author": "Joe Davies",
-  "license": "ISC",
+  "license": "EUPL",
   "bugs": {
     "url": "https://github.com/eurostat/regl-map-animation/issues"
   },

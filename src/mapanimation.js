@@ -67,6 +67,9 @@ export function animation() {
   out.endFunction_ = null;
   out.initFunction_ = null;
 
+  //define initial animation
+  out.initialAnimation_ = false;
+
   //definition of generic accessors based on the name of each parameter name
   for (var p in out)
     (function () {
@@ -123,35 +126,62 @@ export function animation() {
     // define the functions that will manipulate the data
     const toMap = points => mapLayout(points, csvData);
     const toBars = points => barsLayout(points, csvData);
+    const toRandom = points => randomLayout(points, csvData);
+    const toSine = points => sineLayout(points, csvData);
+    const toSpiral = points => spiralLayout(points, csvData);
+    const toPhyllotaxis = points => phyllotaxisLayout(points, csvData);
+    const toRollout = points => rolloutLayout(points, csvData);
 
     //add colour
     colorDataByClass(points, csvData);
 
-    // initial points starting positions
-    points.forEach((d, i) => {
-      //random
-      // var posx = Math.floor(Math.random() * out.width_);
-      // var posy = Math.floor(Math.random() * out.height_);
 
-      //circle
-      let u = i / csvData.length;
-      let angle = u * Math.PI * 2.0; // goes from 0 to 2PI
-      let radius = 100;
-      var posx = ((Math.sin(angle) * radius) + out.width_ / 2);
-      var posy = ((Math.cos(angle) * radius) + out.height_ / 2);
+    let layouts = [];
+    // initial layout
+    if (out.initialAnimation_) {
 
-      //geographic
-      // var posx = csvData[i].x;
-      // var posy = csvData[i].y;
+      if (out.initialAnimation_ == "random") {
+        randomLayout(points, csvData)
+        layouts.push(toRandom)
+      } else if (out.initialAnimation_ == "rollout") {
+        rolloutLayout(points, csvData);
+        layouts.push(toRollout)
+      } else if (out.initialAnimation_ == "phyllotaxis") {
+        phyllotaxisLayout(points, csvData)
+        layouts.push(toPhyllotaxis)
+      } else if (out.initialAnimation_ == "sine") {
+        sineLayout(points, csvData)
+        layouts.push(toSine)
+      } else if (out.initialAnimation_ == "spiral") {
+        spiralLayout(points, csvData)
+        layouts.push(toSpiral)
+      }
+
+      // inital locations
+      points.forEach((d, i) => {
+        let posx = d.x;
+        let posy = d.y;
+        d.tx = posx;
+        d.ty = posy;
+        d.colorEnd = d.color;
+      })
+    } else {
+      // otherwise use csv x/y
+      points.forEach((d, i) => {
+        let posx = csvData[i].x;
+        let posy = csvData[i].y;
+        d.tx = posx;
+        d.ty = posy;
+        d.colorEnd = d.color;
+      })
+    }
 
 
-      d.tx = posx;
-      d.ty = posy;
-      d.colorEnd = d.color;
-    });
 
     //define order of transitions
-    const layouts = [toMap, toBars]; //order of animations
+    // layouts.push(toMap); //order of animations
+    // layouts.push(toBars);
+    layouts.push(toMap, toBars)
 
     // start animation loop
     animationLoop(layouts, points);
@@ -477,6 +507,8 @@ export function animation() {
     return out;
   }
 
+  //LAYOUTS
+
   function mapLayout(points, csvData) {
     hideLabels();
     function projectData(data) {
@@ -529,6 +561,90 @@ export function animation() {
     }, out.duration_);
 
     return out;
+  }
+
+  function randomLayout(points, csvData) {
+    hideLabels();
+    points.forEach((point, i) => {
+      point.x = Math.floor(Math.random() * out.width_);
+      point.y = Math.floor(Math.random() * out.height_);
+      point.colorEnd = point.color;
+    })
+
+    return out;
+  }
+
+  function rolloutLayout(points, csvData) {
+    hideLabels();
+    points.forEach((point, i) => {
+      let u = i / csvData.length;
+      let angle = u * Math.PI * 2.0; // goes from 0 to 2PI
+      let radius = 100;
+      point.x = ((Math.sin(angle) * radius) + out.width_ / 2);
+      point.y = ((Math.cos(angle) * radius) + out.height_ / 2);
+      point.colorEnd = point.color;
+    })
+    return points;
+  }
+
+  function phyllotaxisLayout(points, csvData) {
+    hideLabels();
+    let xOffset = out.width_ / 2, yOffset = out.height_ / 2, iOffset = 0;
+    const theta = Math.PI * (3 - Math.sqrt(5));
+    const pointRadius = out.pointWidth_ / 2;
+
+    //phyllotaxis layout
+    points.forEach((point, i) => {
+      const index = (i + iOffset) % points.length;
+      const phylloX = pointRadius * Math.sqrt(index) * Math.cos(index * theta);
+      const phylloY = pointRadius * Math.sqrt(index) * Math.sin(index * theta);
+
+      point.x = xOffset + phylloX - pointRadius;
+      point.y = yOffset + phylloY - pointRadius;
+      point.colorEnd = point.color;
+    })
+    return points;
+  }
+
+  // https://bl.ocks.org/pbeshai/51d05995c5410a52116f89738144c622
+  function spiralLayout(points, csvData) {
+    hideLabels();
+    const amplitude = 0.3 * (out.height_ / 2);
+    const xOffset = out.width_ / 2;
+    const yOffset = out.height_ / 2;
+    const periods = 20;
+
+    const rScale = d3.scaleLinear()
+      .domain([0, points.length - 1])
+      .range([0, Math.min(out.width_ / 2, out.height_ / 2) - out.pointWidth_]);
+
+    const thetaScale = d3.scaleLinear()
+      .domain([0, points.length - 1])
+      .range([0, periods * 2 * Math.PI]);
+
+    points.forEach((point, i) => {
+      point.x = rScale(i) * Math.cos(thetaScale(i)) + xOffset
+      point.y = rScale(i) * Math.sin(thetaScale(i)) + yOffset;
+      point.colorEnd = point.color;
+    });
+    return points;
+  }
+
+  function sineLayout(points, csvData) {
+    hideLabels();
+    const amplitude = 0.3 * (out.height_ / 2);
+    const yOffset = out.height_ / 2;
+    const periods = 3;
+    const yScale = d3.scaleLinear()
+      .domain([0, points.length - 1])
+      .range([0, periods * 2 * Math.PI]);
+
+    points.forEach((point, i) => {
+      point.x = (i / points.length) * (out.width_ - out.pointWidth_);
+      point.y = amplitude * Math.sin(yScale(i)) + yOffset;
+      point.colorEnd = point.color;
+    });
+    return points;
   }
 
   function hideLegend() {
@@ -669,6 +785,7 @@ export function animation() {
         color: d.color
       };
     });
+
     arrangement.forEach(function (d, i) {
       Object.assign(points[i], d);
     });
@@ -793,7 +910,7 @@ export function animation() {
     data.forEach(function (d, i) {
       classifyPoint(d, csvData[i], out.colors_, out.thresholds_);
     });
-    console.log(stats);
+    console.log(stats); //for counting
     return out;
   }
 

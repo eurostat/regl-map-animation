@@ -46,7 +46,7 @@
           "#d76e2d"
         ])
         .thresholds([0, 1, 250, 750, 1500, 3000, 7500, 25000])
-        .duration(2000)
+        .duration(1000)
         .delayAtEnd(2000)
         .xAxisTitle("Population (number of people living per 5x5 km²)")
         .yAxisTitle("Area (in km²)")
@@ -60,6 +60,7 @@
         .chartOffsetY(-100)
         .legend(true)
         .legendTitle("Population per 5x5 km²")
+        .initialAnimation("rollout")
         .animate();
     });
   </script>
