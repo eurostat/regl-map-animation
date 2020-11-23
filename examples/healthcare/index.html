@@ -36,9 +36,9 @@
                 .colors([
                     //"#2d50a0",
                     "grey", //no data
-                    "blue",
-                    "orange",
-                    "red",
+                    "#33a02c",
+                    "#1f78b4",
+                    "#e41a1c"
                 ])
                 .thresholds([0, 1, 100, 1000])
                 .duration(2000)
@@ -60,6 +60,7 @@
                     }
                 })
                 .legend(true)
+                .legendHeight(150)
                 .legendTitle("Number of beds")
                 .projectionFunction(d3.geoAzimuthalEqualArea().scale(1400).center([14, 50]).translate([780, 500]))
                 .animate();
