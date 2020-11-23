@@ -8,12 +8,14 @@
 <img src="assets/images/optimized.gif" alt="preview"/>
 <div>
 
+Animate x/y point data using [regl](https://github.com/regl-project/regl) and categorize them into a bar chart. Point data should be defined as an array of objects {x,y,value} - with "value" being the numerical indicator with which the points will be categorized.
+
 ## Examples
 
-[Population grid of Europe](https://eurostat.github.io/regl-map-animation/examples/population/)
-[Healthcare services](https://eurostat.github.io/regl-map-animation/examples/population/)
+[Population grid of Europe](https://eurostat.github.io/regl-map-animation/examples/population/)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/index.html) 
 
-Animate x/y point data using [regl](https://github.com/regl-project/regl) and categorize them for vizualization. Point data should be defined as an array of objects {x,y,value} - with "value" being the numerical indicator with which the points will be categorized.
+[Healthcare services](https://eurostat.github.io/regl-map-animation/examples/population/) | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/healthcare/index.html) 
+
 
 ## Installation & Usage
 
