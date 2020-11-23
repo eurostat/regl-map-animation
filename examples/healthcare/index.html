@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <!-- <meta http-equiv="X-UA-Compatible" content="ie=edge" /> -->
+    <title>Example</title>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script src="../../build/reglmapanimation.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
+        integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y=" crossorigin="anonymous"></script>
+    <script>
+        d3.csv("../../assets/csv/healthcare_facilities.csv", d => {
+            return {
+                value: d.cap_beds,
+                y: +d.lat, //add removed zeros to make true EPSG3035
+                x: +d.lon
+            };
+        }).then(pointData => {
+            //set container fullscreen
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            let container = document.getElementById("container");
+            container.style.height = height + "px";
+            container.style.width = width + "px";
+
+            ReglMapAnimation.animation()
+                .container(container)
+                .pointData(pointData)
+                .width(window.innerWidth)
+                .height(window.innerHeight)
+                .colors([
+                    //"#2d50a0",
+                    "grey", //no data
+                    "blue",
+                    "orange",
+                    "red",
+                ])
+                .thresholds([0, 1, 100, 1000])
+                .duration(2000)
+                .delayAtEnd(2000)
+                .pointWidth(4)
+                .xAxisTitle("Number of hospital beds")
+                .yAxisTitle("Hospitals")
+                .binLabels(true)
+                .binLabelOffsetX(30)
+                .binXLabelFunction(function (bin, nextBin) {
+                    if (bin.value == 0) {
+                        return "No data"
+                    } else {
+                        if (nextBin) {
+                            return parseInt(bin.value) + " to " + parseInt(nextBin.value);
+                        } else {
+                            return "≥ " + parseInt(bin.value);
+                        }
+                    }
+                })
+                .legend(true)
+                .legendTitle("Number of beds")
+                .projectionFunction(d3.geoAzimuthalEqualArea().scale(1400).center([14, 50]).translate([780, 500]))
+                .animate();
+        });
+    </script>
+</body>
+
+</html>

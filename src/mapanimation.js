@@ -14,6 +14,7 @@ export function animation() {
   let currentLayout = 0; // initial layout is 0
   let out = {};
 
+  // all of the following out[prop] properties are exposed as functions to the user and their values can therefore be overwritten at will.
   out.pointData_ = null; // parsed point data [x,y,indicator]
   out.container_ = null; //HTML DIV element that REGL will use to render the animation
   out.numPoints_ = null; // number of points to display
@@ -24,32 +25,34 @@ export function animation() {
   out.width_ = window.innerWidth;
   out.height_ = window.innerHeight;
   out.colors_ = ["#005cff", "#55e238", "#ebff0a", "#ff0f00"];
-  out.stops_ = [1, 100, 1000, 10000];
-  out.projection_ = "EPSG:3035";
+  out.thresholds_ = [1, 100, 1000, 10000];
+  out.projectionFunction_ = null;
   out.backgroundColor_ = [1, 1, 1, 1];
   out.mapPadding_ = 50; //padding to animation frame in pixels
   out.legend_ = true;
-  out.legendTitle_ = "Legend";
+  out.legendTitle_ = null;
   out.legendHeight_ = 250;
   out.binLabels_ = true;
   out.binWidth_ = null;
   out.binMargin_ = null;
-  out.xAxisTitle_ = "Population";
-  out.yAxisTitle_ = "Area";
+  out.xAxisTitle_ = null;
+  out.yAxisTitle_ = null;
   out.xAxisTitleOffsetX_ = -250;
   out.yAxisTitleOffsetX_ = -50;
   out.binLabelOffsetX_ = 40;
   out.binLabelOffsetY_ = -30;
   out.chartOffsetX_ = 100;
-  out.chartOffsetY_ = -50;
+  out.chartOffsetY_ = -150;
   out.binYLabelFunction_ = function (bin) {
     return (
-      formatStr(Math.round((bin.binCount * 25) / 1000) * 1000) + " km²"
-
+      Math.round(bin.binCount) // return bin count by default
     );
   };
   out.binXLabelFunction_ = function (bin, nextBin) {
-    if (bin.value == 0) {
+    // deafult x axis labels
+    if (bin.value == null) {
+      return "no data"
+    } else if (bin.value == 0) {
       return "0"
     } else {
       if (nextBin) {
@@ -100,6 +103,10 @@ export function animation() {
       out.container_ = document.body;
       regl = require("regl")();
     }
+    if (out.container_ instanceof HTMLCanvasElement) {
+      out.ctx = out.container_.getContext("webgl")
+    }
+
 
     if (!out.numPoints_) {
       out.numPoints_ = out.pointData_.length;
@@ -151,7 +158,7 @@ export function animation() {
 
     //for recording purposes
     if (out.initFunction_) {
-      let canvas = out.container_.childNodes[0];
+      let canvas = out.container_;
       out.initFunction_(canvas);
     }
   }
@@ -167,9 +174,9 @@ export function animation() {
 
     // create a list of keys
     let legendData = [];
-    for (let i = 0; i < out.stops_.length; i++) {
+    for (let i = 0; i < out.thresholds_.length; i++) {
       legendData.push({
-        stop: out.stops_[i],
+        stop: out.thresholds_[i],
         color: out.colors_[i],
         index: i
       });
@@ -423,7 +430,7 @@ export function animation() {
 
       //run user-defined render function
       if (out.frameFunction_) {
-        let canvas = out.container_.childNodes[0];
+        let canvas = out.container_;
         out.frameFunction_(canvas);
         recording = true;
       }
@@ -451,7 +458,7 @@ export function animation() {
         if (loopsCompleted === 3) {
           if (out.endFunction_) {
             if (out.endFunction_) {
-              let canvas = out.container_.childNodes[0];
+              let canvas = out.container_;
               out.endFunction_(canvas);
               recording = false;
               frameLoop.cancel();
@@ -486,17 +493,9 @@ export function animation() {
           [xExtent[1], yExtent[1]]
         ]
       };
-      if (out.projection_ == "EPSG:4326") {
-        var projection = d3
-          .geoMercator()
-          .fitSize([out.width_, out.height_], extentGeoJson);
-      } else {
-        /*       var projection = d3
-      .geoAzimuthalEqualArea()
-      .rotate([-10, -52])
-      .scale(700) */
 
-        //use d3 scaling to transform coords
+      if (!out.projectionFunction_) {
+        //use d3 scaling to transform coords if no projection is specified
         var xScale3035 = d3
           .scaleLinear()
           .domain(xExtent) // unit: km
@@ -507,11 +506,12 @@ export function animation() {
           .range([out.height_ - out.mapPadding_, 0 + out.mapPadding_]); // unit: pixels
       }
 
+      //project points
       data.forEach(function (d, i) {
         var point = csvData[i];
         let location;
-        if (out.projection_ == "EPSG:4326") {
-          location = projection([point.x, point.y]);
+        if (out.projectionFunction_) {
+          location = out.projectionFunction_([point.x, point.y]);
           d.x = location[0];
           d.y = location[1];
         } else {
@@ -601,11 +601,12 @@ export function animation() {
     var minBinWidth = out.width_ / (numBins * 2.5);
     var totalExtraWidth =
       out.width_ - out.binMargin_ * (numBins - 1) - minBinWidth * numBins;
+    //calculate bin widths
     var binWidths = byValue.map(function (d) {
       if (out.binWidth_) {
         return out.binWidth_;
       } else {
-        return (containerWidth - out.binMargin_ * out.stops_.length) / out.stops_.length;
+        return (containerWidth - out.binMargin_ * out.thresholds_.length) / out.thresholds_.length;
       }
 
       // return (
@@ -698,12 +699,18 @@ export function animation() {
 
   // bar chart Y axis label
   function createLabelY(bin) {
-    let div = document.createElement("div");
-    div.classList.add("regl-animation-label");
-    div.innerHTML = out.binYLabelFunction_(bin); //total km2
     let labelY = bin.maxY + out.binLabelOffsetY_;
     let labelX = (bin.binStart + bin.binWidth / 2) + out.binLabelOffsetX_;
 
+    //canvas labels
+    // let text = out.binYLabelFunction_(bin)
+    // out.ctx.fillStyle = 'black';
+    // out.ctx.fillText(text, labelX, labelY);
+
+    //html labels
+    let div = document.createElement("div");
+    div.classList.add("regl-animation-label");
+    div.innerHTML = out.binYLabelFunction_(bin); //bin total
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
     div.style.position = "absolute";
@@ -712,9 +719,6 @@ export function animation() {
 
   // bar chart X axis label
   function createLabelX(bin, nextBin) {
-    let div = document.createElement("div");
-    div.classList.add("regl-animation-label", "regl-chart-label-x");
-    div.innerHTML = out.binXLabelFunction_(bin, nextBin); //total km2
     let labelY = out.height_ + out.chartOffsetY_;
     let labelX;
     if (nextBin) {
@@ -722,21 +726,34 @@ export function animation() {
     } else {
       labelX = (bin.binStart + bin.binWidth / 2) + out.binLabelOffsetX_ + 10;
     }
-
-
+    //html labels
+    let div = document.createElement("div");
+    div.classList.add("regl-animation-label", "regl-chart-label-x");
+    div.innerHTML = out.binXLabelFunction_(bin, nextBin); //total
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
     div.style.position = "absolute";
     return div;
+
+    //canvas labels
+    // let text = out.binXLabelFunction_(bin)
+    // out.ctx.fillStyle = 'black';
+    // out.ctx.fillText(text, labelX, labelY);
+
   }
 
   function createChartTitleX() {
-    let div = document.createElement("div");
-    div.classList.add("regl-animation-chart-title");
-    div.innerHTML = out.xAxisTitle_; //total km2
     let labelY = out.height_ + out.chartOffsetY_ + 40;
     let labelX = out.width_ / 2 + out.xAxisTitleOffsetX_;
 
+    //canvas implementation
+    // out.ctx.fillStyle = 'black';
+    // out.ctx.fillText(out.xAxisTitle_, labelX, labelY);
+
+    //html labels
+    let div = document.createElement("div");
+    div.classList.add("regl-animation-chart-title");
+    div.innerHTML = out.xAxisTitle_;
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
     div.style.position = "absolute";
@@ -747,10 +764,15 @@ export function animation() {
     let div = document.createElement("div");
     div.id = "regl-chart-title-Y";
     div.classList.add("regl-animation-chart-title");
-    div.innerHTML = out.yAxisTitle_; //total km2
+    div.innerHTML = out.yAxisTitle_;
+
     let labelY = out.height_ / 2;
     let labelX = out.yAxisTitleOffsetX_;
+    //canvas implementation
+    // out.ctx.fillStyle = 'black';
+    // out.ctx.fillText(out.yAxisTitle_, labelX, labelY);
 
+    //html labels
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
     div.style.position = "absolute";
@@ -769,7 +791,7 @@ export function animation() {
   }
   function colorDataByClass(data, csvData) {
     data.forEach(function (d, i) {
-      classifyPoint(d, csvData[i], out.colors_, out.stops_);
+      classifyPoint(d, csvData[i], out.colors_, out.thresholds_);
     });
     console.log(stats);
     return out;

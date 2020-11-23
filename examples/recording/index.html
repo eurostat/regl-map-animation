@@ -9,7 +9,7 @@
 </head>
 
 <body>
-  <div id="container"></div>
+  <canvas id="container" width="600" height="500"></canvas>
   <script src="../../build/reglmapanimation.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
     integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y=" crossorigin="anonymous"></script>
@@ -21,9 +21,8 @@
     // Create a capturer that exports an animated GIF
     // Notices you have to specify the path to the gif.worker.js 
     var capturer = new CCapture({
-      format: 'webm', //webm/gif/png/jpg/ffmpegserver
+      format: 'gif', //webm/gif/png/jpg/ffmpegserver
       workersPath: '../../assets/js/',
-      //format: "webm",
       framerate: 60,
       name: "mp4_15FPS_QUAL1",
       quality: 1,
@@ -41,11 +40,11 @@
         x: +d.x
       };
     }).then(pointData => {
-      let width = 900;
+      let width = 1000;
       let height = 700;
       let container = document.getElementById("container");
-      container.style.height = height + "px";
-      container.style.width = width + "px";
+      // container.style.height = height + "px";
+      // container.style.width = width + "px";
 
       //init animation
       let anim = ReglMapAnimation.animation()
@@ -53,20 +52,29 @@
         .pointData(pointData)
         .width(width)
         .height(height)
+        // .colors([
+        //   //"#2d50a0",
+        //   "#00227a",
+        //   "#6487c3",
+        //   "rgb(142, 156, 180)",
+        //   "#f0cd91",
+        //   "rgb(235, 185, 98)",
+        //   "#e6a532",
+        //   "rgb(223, 138, 48)",
+        //   "#d76e2d"
+        // ])
         .colors([
-          //"#2d50a0",
-          "#00227a",
-          "#6487c3",
-          "rgb(142, 156, 180)",
-          "#f0cd91",
-          "rgb(235, 185, 98)",
-          "#e6a532",
-          "rgb(223, 138, 48)",
-          "#d76e2d"
+          "#ffffcc",
+          "#c7e9b4",
+          "#7fcdbb",
+          "#41b6c4",
+          "#1d91c0",
+          "#225ea8",
+          "#0c2c84"
         ])
         .stops([0, 1, 250, 750, 1500, 3000, 7500, 25000])
-        .duration(2000)
-        .delayAtEnd(500)
+        .duration(1000)
+        .delayAtEnd(0)
         .binLabels(true)
         .legend(true)
         .legendTitle("Population per 5 km²")
