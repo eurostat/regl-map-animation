@@ -14,9 +14,6 @@ Animate x/y point data using [regl](https://github.com/regl-project/regl) and ca
 
 [Population grid of Europe](https://eurostat.github.io/regl-map-animation/examples/population/)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/index.html) 
 
-[Healthcare services](https://eurostat.github.io/regl-map-animation/examples/healthcare/) | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/healthcare/index.html) 
-
-
 ## Installation & Usage
 
 The project is built using UMD so it works both in browsers and in node.js
