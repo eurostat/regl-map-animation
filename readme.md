@@ -16,11 +16,11 @@ Animate x/y point data using [regl](https://github.com/regl-project/regl) and ca
 
 ### Different animation patterns
 
-[Phyllotaxis](https://eurostat.github.io/regl-map-animation/examples/population/phyllotaxis)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/phyllotaxis/index.html) 
-[Random](https://eurostat.github.io/regl-map-animation/examples/population/random)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/random/index.html) 
-[Sine](https://eurostat.github.io/regl-map-animation/examples/population/sine)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/sine/index.html) 
-[Spiral](https://eurostat.github.io/regl-map-animation/examples/population/spiral)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/spiral/index.html) 
-[Rollout](https://eurostat.github.io/regl-map-animation/examples/population/rollout)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/rollout/index.html) 
+[Phyllotaxis](https://eurostat.github.io/regl-map-animation/examples/population/phyllotaxis)  |  
+[Random](https://eurostat.github.io/regl-map-animation/examples/population/random)  | 
+[Sine](https://eurostat.github.io/regl-map-animation/examples/population/sine)  | 
+[Spiral](https://eurostat.github.io/regl-map-animation/examples/population/spiral)  |  
+[Rollout](https://eurostat.github.io/regl-map-animation/examples/population/rollout)  | 
 
 ## Installation & Usage
 
