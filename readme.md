@@ -14,6 +14,14 @@ Animate x/y point data using [regl](https://github.com/regl-project/regl) and ca
 
 [Population grid of Europe](https://eurostat.github.io/regl-map-animation/examples/population/)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/index.html) 
 
+### Different animation patterns
+
+[Phyllotaxis](https://eurostat.github.io/regl-map-animation/examples/population/phyllotaxis)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/phyllotaxis/index.html) 
+[Random](https://eurostat.github.io/regl-map-animation/examples/population/random)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/random/index.html) 
+[Sine](https://eurostat.github.io/regl-map-animation/examples/population/sine)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/sine/index.html) 
+[Spiral](https://eurostat.github.io/regl-map-animation/examples/population/spiral)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/spiral/index.html) 
+[Rollout](https://eurostat.github.io/regl-map-animation/examples/population/rollout)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/rollout/index.html) 
+
 ## Installation & Usage
 
 The project is built using UMD so it works both in browsers and in node.js

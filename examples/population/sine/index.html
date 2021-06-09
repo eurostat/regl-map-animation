@@ -10,11 +10,11 @@
 
 <body>
   <div id="container"></div>
-  <script src="../../build/reglmapanimation.js"></script>
+  <script src="../../../build/reglmapanimation.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
     integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y=" crossorigin="anonymous"></script>
   <script>
-    d3.csv("../../assets/csv/pop_grid_5km.csv", d => {
+    d3.csv("../../../assets/csv/pop_grid_5km.csv", d => {
       return {
         value: d.value,
         y: +d.y,
@@ -60,7 +60,7 @@
         .chartOffsetY(-100)
         .legend(true)
         .legendTitle("Population per 25 km²")
-        //.initialAnimation("spiral")
+        .initialAnimation("sine")
         .animate();
     });
   </script>
