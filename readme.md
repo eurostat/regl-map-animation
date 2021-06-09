@@ -16,11 +16,11 @@ Animate x/y point data using [regl](https://github.com/regl-project/regl) and ca
 
 ### Different animation patterns
 
-[Phyllotaxis](https://eurostat.github.io/regl-map-animation/examples/population/phyllotaxis)  |  
-[Random](https://eurostat.github.io/regl-map-animation/examples/population/random)  | 
-[Sine](https://eurostat.github.io/regl-map-animation/examples/population/sine)  | 
-[Spiral](https://eurostat.github.io/regl-map-animation/examples/population/spiral)  |  
-[Rollout](https://eurostat.github.io/regl-map-animation/examples/population/rollout)  | 
+[Phyllotaxis](https://eurostat.github.io/regl-map-animation/examples/population/phyllotaxis)  |
+[Random](https://eurostat.github.io/regl-map-animation/examples/population/random)  |
+[Sine](https://eurostat.github.io/regl-map-animation/examples/population/sine)  |
+[Spiral](https://eurostat.github.io/regl-map-animation/examples/population/spiral)  |
+[Rollout](https://eurostat.github.io/regl-map-animation/examples/population/rollout)  
 
 ## Installation & Usage
 
