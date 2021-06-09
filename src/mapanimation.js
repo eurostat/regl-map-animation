@@ -196,9 +196,9 @@ export function animation() {
   function addLegendToContainer() {
     let padding = 10;
     let svg = d3.create("svg");
-    svg.attr("class", "regl-animation-legend");
+    svg.attr("class", "regl-animation-legend").attr("viewBox", "0 0 210 270");
     if (out.legendHeight_) {
-      svg.style("height", out.legendHeight_);
+      svg.style("height", out.legendHeight_ + "px");
     }
     out.container_.appendChild(svg.node());
 
@@ -214,8 +214,8 @@ export function animation() {
 
     // Add one square in the legend for each name.
     var size = 20;
-    let titleY = 10;
-    let titleYoffset = 25;
+    let titleY = 20;
+    let titleYoffset = 35;
     //title
     svg
       .append("text")
@@ -224,6 +224,7 @@ export function animation() {
       .attr("y", titleY)
       .attr("text-anchor", "left")
       .style("alignment-baseline", "middle")
+      
       .text(out.legendTitle_);
 
     svg
