@@ -32,7 +32,7 @@
   opacity: 0;
   transition: visibility 0.8s, opacity 0.8s linear;
   font-weight: bold;
-  font-size: 30px;
+  font-size: 20px;
 }
 #regl-chart-title-Y {
   -webkit-transform: rotate(-90deg);

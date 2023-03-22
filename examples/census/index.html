@@ -24,7 +24,7 @@
         };
       }).then((pointData) => {
         //make container fill screen
-        let width = Math.min(window.innerWidth, 1000);
+        let width = Math.min(window.innerWidth, 1200);
         let height = Math.min(window.innerHeight, 700);
         let container = document.getElementById("container");
         container.style.height = height + "px";
@@ -38,18 +38,8 @@
           .pointMargin(0)
           .width(width)
           .height(height)
-          .colors([
-            //"#2d50a0",
-            "#00227a",
-            "#6487c3",
-            "rgb(142, 156, 180)",
-            "#f0cd91",
-            "rgb(235, 185, 98)",
-            "#e6a532",
-            "rgb(223, 138, 48)",
-            "#d76e2d",
-          ])
-          .thresholds([0, 1, 250, 750, 1500, 3000, 7500, 25000])
+          .colors(["#ffffcc", "#c7e9b4", "#7fcdbb", "#41b6c4", "#2c7fb8", "#253494"])
+          .thresholds([0, 25000, 50000, 10000, 100000, 200000])
           .duration(1000)
           .delayAtEnd(2000)
           .xAxisTitle("Population (number of inhabitants per 25 km²)")
