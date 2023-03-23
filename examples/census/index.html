@@ -7,8 +7,20 @@
     <title>Example</title>
   </head>
 
-  <body>
-    <div id="container"></div>
+  <body
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+      vertical-align: middle;
+      height: 100vh;
+      width: 100vw;
+    "
+  >
+    <div id="container">
+      <!-- <canvas id="reglCanvas"></canvas> -->
+    </div>
     <script src="../../build/reglmapanimation.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
@@ -16,7 +28,7 @@
       crossorigin="anonymous"
     ></script>
     <script>
-      d3.csv("../../assets/csv/2021/pop_50000m.csv", (d) => {
+      d3.csv("../../assets/csv/2021/pop_5000m.csv", (d) => {
         return {
           value: d.pop,
           y: +d.y,
@@ -24,25 +36,31 @@
         };
       }).then((pointData) => {
         //make container fill screen
-        let width = Math.min(window.innerWidth, 1200);
-        let height = Math.min(window.innerHeight, 700);
+        let width = Math.min(window.innerWidth, 900);
+        let height = Math.min(window.innerHeight, 600);
         let container = document.getElementById("container");
         container.style.height = height + "px";
         container.style.width = width + "px";
+        // let canvas = document.getElementById("reglCanvas");
+        // canvas.style.height = height + "px";
+        // canvas.style.width = width + "px";
 
         //animation
         ReglMapAnimation.animation()
           .container(container)
+          //.canvas(canvas)
           .pointData(pointData)
-          .pointWidth(10)
+          .pointWidth(1)
           .pointMargin(0)
+          .mapPadding(0)
           .width(width)
           .height(height)
-          .colors(["#ffffcc", "#c7e9b4", "#7fcdbb", "#41b6c4", "#2c7fb8", "#253494"])
-          .thresholds([0, 25000, 50000, 10000, 100000, 200000])
+          .colors(["#ffffb2", "#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"])
+          .thresholds([0, 1, 500, 1000, 10000, 25000])
           .duration(1000)
           .delayAtEnd(2000)
           .xAxisTitle("Population (number of inhabitants per 25 km²)")
+          .xAxisTitleOffsetX(-150)
           .yAxisTitle("Area (in km²)")
           .binLabels(true)
           .binYLabelFunction(function (bin) {
@@ -50,10 +68,12 @@
             let str = count.toLocaleString("en").replace(/,/gi, " ");
             return str + " km²";
           })
-          .binLabelOffsetX(40)
+          .binLabelOffsetX(50)
           .chartOffsetY(0)
           .legend(true)
           .legendTitle("Population per 25 km²")
+          .legendHeight(200)
+          .legendFontSize(14)
           //.initialAnimation("spiral")
           .animate();
       });

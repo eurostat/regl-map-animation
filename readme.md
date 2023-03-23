@@ -12,15 +12,15 @@ Animate x/y point data using [regl](https://github.com/regl-project/regl) and ca
 
 ## Examples
 
-[Population grid of Europe](https://eurostat.github.io/regl-map-animation/examples/population/)  | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/index.html) 
+[Population grid of Europe](https://eurostat.github.io/regl-map-animation/examples/population/) | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/index.html)
 
 ### Different animation patterns
 
-[Phyllotaxis](https://eurostat.github.io/regl-map-animation/examples/population/phyllotaxis)  |
-[Random](https://eurostat.github.io/regl-map-animation/examples/population/random)  |
-[Sine](https://eurostat.github.io/regl-map-animation/examples/population/sine)  |
-[Spiral](https://eurostat.github.io/regl-map-animation/examples/population/spiral)  |
-[Rollout](https://eurostat.github.io/regl-map-animation/examples/population/rollout)  
+[Phyllotaxis](https://eurostat.github.io/regl-map-animation/examples/population/phyllotaxis) |
+[Random](https://eurostat.github.io/regl-map-animation/examples/population/random) |
+[Sine](https://eurostat.github.io/regl-map-animation/examples/population/sine) |
+[Spiral](https://eurostat.github.io/regl-map-animation/examples/population/spiral) |
+[Rollout](https://eurostat.github.io/regl-map-animation/examples/population/rollout)
 
 ## Installation & Usage
 
@@ -107,7 +107,8 @@ Then:
 | binLabelXFunction  | Function used to define bin X label                                                                                                  | Function                                | False    | Returns threhold labels in the form of: threshold "to" nextThreshold |
 | initialAnimation   | Define the type of transition used to load the initial points. Accepted values: "random", "phyllotaxis", "sine", "spiral", "rollout" | String                                  | False    | null (uses x & y from pointData)                                     |
 
-
 ## Notes
 
 Inspired by [Peter Beshai](https://peterbeshai.com/) and adapted from his [excellent tutorial](https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/) on regl.
+
+Node.js v16.

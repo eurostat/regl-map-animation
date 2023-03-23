@@ -16,7 +16,8 @@ export function animation() {
 
   // all of the following out[prop] properties are exposed as functions to the user and their values can therefore be overwritten at will.
   out.pointData_ = null; // parsed point data [x,y,indicator]
-  out.container_ = null; //HTML DIV element that REGL will use to render the animation
+  out.container_ = null; // HTML DIV element that REGL will use to render the animation and legend and chart labels
+  out.canvas_ = null; // HTML canvas element that REGL will use to render the animation
   out.numPoints_ = null; // number of points to display
   out.pointWidth_ = 1; // width of each point
   out.pointMargin_ = 0; // Margin used for bar chart
@@ -32,6 +33,8 @@ export function animation() {
   out.legend_ = true;
   out.legendTitle_ = null;
   out.legendHeight_ = 250;
+  out.legendFontSize_ = 14;
+  out.legendTitleFontSize_ = 18;
   out.binLabels_ = true;
   out.binWidth_ = null;
   out.binMargin_ = null;
@@ -44,16 +47,14 @@ export function animation() {
   out.chartOffsetX_ = 100;
   out.chartOffsetY_ = -150;
   out.binYLabelFunction_ = function (bin) {
-    return (
-      Math.round(bin.binCount) // return bin count by default
-    );
+    return Math.round(bin.binCount); // return bin count by default
   };
   out.binXLabelFunction_ = function (bin, nextBin) {
     // deafult x axis labels
     if (bin.value == null) {
-      return "no data"
+      return "no data";
     } else if (bin.value == 0) {
-      return "0"
+      return "0";
     } else {
       if (nextBin) {
         return formatStr(parseInt(bin.value)) + " to " + formatStr(parseInt(nextBin.value));
@@ -89,7 +90,7 @@ export function animation() {
 
     //empty container
     if (out.container_) {
-      out.container_.classList.add("map-animation-container")
+      out.container_.classList.add("map-animation-container");
     }
 
     main(out.pointData_);
@@ -99,7 +100,9 @@ export function animation() {
   // where the fun begins
   function main(csvData) {
     // initialize regl
-    if (out.container_) {
+    if (out.canvas_) {
+      regl = require("regl")(out.canvas_);
+    } else if (out.container_ && !out.canvas_) {
       out.container_.style.position = "relative";
       regl = require("regl")(out.container_);
     } else {
@@ -107,9 +110,8 @@ export function animation() {
       regl = require("regl")();
     }
     if (out.container_ instanceof HTMLCanvasElement) {
-      out.ctx = out.container_.getContext("webgl")
+      out.ctx = out.container_.getContext("webgl");
     }
-
 
     if (!out.numPoints_) {
       out.numPoints_ = out.pointData_.length;
@@ -121,40 +123,38 @@ export function animation() {
     if (out.legend_) addLegendToContainer(out);
 
     // create initial set of points from csv data
-    const points = d3.range(out.numPoints_).map(d => ({}));
+    const points = d3.range(out.numPoints_).map((d) => ({}));
 
     // define the functions that will manipulate the data
-    const toMap = points => mapLayout(points, csvData);
-    const toBars = points => barsLayout(points, csvData);
-    const toRandom = points => randomLayout(points, csvData);
-    const toSine = points => sineLayout(points, csvData);
-    const toSpiral = points => spiralLayout(points, csvData);
-    const toPhyllotaxis = points => phyllotaxisLayout(points, csvData);
-    const toRollout = points => rolloutLayout(points, csvData);
+    const toMap = (points) => mapLayout(points, csvData);
+    const toBars = (points) => barsLayout(points, csvData);
+    const toRandom = (points) => randomLayout(points, csvData);
+    const toSine = (points) => sineLayout(points, csvData);
+    const toSpiral = (points) => spiralLayout(points, csvData);
+    const toPhyllotaxis = (points) => phyllotaxisLayout(points, csvData);
+    const toRollout = (points) => rolloutLayout(points, csvData);
 
     //add colour
     colorDataByClass(points, csvData);
 
-
     let layouts = [];
     // initial layout
     if (out.initialAnimation_) {
-
       if (out.initialAnimation_ == "random") {
-        randomLayout(points, csvData)
-        layouts.push(toRandom)
+        randomLayout(points, csvData);
+        layouts.push(toRandom);
       } else if (out.initialAnimation_ == "rollout") {
         rolloutLayout(points, csvData);
-        layouts.push(toRollout)
+        layouts.push(toRollout);
       } else if (out.initialAnimation_ == "phyllotaxis") {
-        phyllotaxisLayout(points, csvData)
-        layouts.push(toPhyllotaxis)
+        phyllotaxisLayout(points, csvData);
+        layouts.push(toPhyllotaxis);
       } else if (out.initialAnimation_ == "sine") {
-        sineLayout(points, csvData)
-        layouts.push(toSine)
+        sineLayout(points, csvData);
+        layouts.push(toSine);
       } else if (out.initialAnimation_ == "spiral") {
-        spiralLayout(points, csvData)
-        layouts.push(toSpiral)
+        spiralLayout(points, csvData);
+        layouts.push(toSpiral);
       }
 
       // inital locations
@@ -164,7 +164,7 @@ export function animation() {
         d.tx = posx;
         d.ty = posy;
         d.colorEnd = d.color;
-      })
+      });
     } else {
       // otherwise use csv x/y
       points.forEach((d, i) => {
@@ -173,15 +173,13 @@ export function animation() {
         d.tx = posx;
         d.ty = posy;
         d.colorEnd = d.color;
-      })
+      });
     }
-
-
 
     //define order of transitions
     // layouts.push(toMap); //order of animations
     // layouts.push(toBars);
-    layouts.push(toMap, toBars)
+    layouts.push(toMap, toBars);
 
     // start animation loop
     animationLoop(layouts, points);
@@ -196,7 +194,8 @@ export function animation() {
   function addLegendToContainer() {
     let padding = 10;
     let svg = d3.create("svg");
-    svg.attr("class", "regl-animation-legend").attr("viewBox", "0 0 210 270");
+    svg.attr("class", "regl-animation-legend");
+    //.attr("viewBox", "0 0 210 270");
     if (out.legendHeight_) {
       svg.style("height", out.legendHeight_ + "px");
     }
@@ -208,7 +207,7 @@ export function animation() {
       legendData.push({
         stop: out.thresholds_[i],
         color: out.colors_[i],
-        index: i
+        index: i,
       });
     }
 
@@ -224,7 +223,7 @@ export function animation() {
       .attr("y", titleY)
       .attr("text-anchor", "left")
       .style("alignment-baseline", "middle")
-      
+      .style("font-size", out.legendTitleFontSize_)
       .text(out.legendTitle_);
 
     svg
@@ -248,6 +247,7 @@ export function animation() {
       .data(legendData)
       .enter()
       .append("text")
+      .style("font-size", out.legendFontSize_)
       .attr("x", padding + size * 1.2)
       .attr("y", function (d, i) {
         return i * (size + 5) + size / 2 + titleYoffset;
@@ -256,9 +256,9 @@ export function animation() {
       .text(function (d, i) {
         if (i !== legendData.length - 1) {
           if (d.stop == 0) {
-            return formatStr(d.stop)
+            return formatStr(d.stop);
           }
-          return formatStr(d.stop) + " to " + formatStr(legendData[i + 1].stop)
+          return formatStr(d.stop) + " to " + formatStr(legendData[i + 1].stop);
         } else {
           return "≥ " + formatStr(d.stop);
         }
@@ -372,11 +372,11 @@ export function animation() {
 			`,
 
       attributes: {
-        positionStart: points.map(d => [d.sx, d.sy]),
-        positionEnd: points.map(d => [d.tx, d.ty]),
-        colorStart: points.map(d => d.colorStart),
-        colorEnd: points.map(d => d.colorEnd),
-        index: d3.range(points.length)
+        positionStart: points.map((d) => [d.sx, d.sy]),
+        positionEnd: points.map((d) => [d.tx, d.ty]),
+        colorStart: points.map((d) => d.colorStart),
+        colorEnd: points.map((d) => d.colorEnd),
+        index: d3.range(points.length),
       },
 
       uniforms: {
@@ -393,11 +393,11 @@ export function animation() {
         // 	return 0; // disable ambient animation
         // },
         // time in milliseconds since the prop startTime (i.e. time elapsed)
-        elapsed: ({ time }, { startTime = 0 }) => (time - startTime) * 1000
+        elapsed: ({ time }, { startTime = 0 }) => (time - startTime) * 1000,
       },
 
       count: points.length,
-      primitive: "points"
+      primitive: "points",
     });
 
     return drawPoints;
@@ -408,7 +408,7 @@ export function animation() {
   function animationLoop(layouts, points) {
     /*  console.log('animating with new layout'); */
     // make previous end the new beginning
-    points.forEach(d => {
+    points.forEach((d) => {
       d.sx = d.tx;
       d.sy = d.ty;
       d.colorStart = d.colorEnd;
@@ -444,7 +444,7 @@ export function animation() {
       regl.clear({
         // background color (black)
         color: out.backgroundColor_,
-        depth: 1
+        depth: 1,
       });
 
       // draw the points using our created regl func
@@ -456,7 +456,7 @@ export function animation() {
         duration: out.duration_,
         numPoints: out.numPoints_,
         delayByIndex: out.delayByIndex,
-        startTime
+        startTime,
       });
 
       //run user-defined render function
@@ -465,7 +465,6 @@ export function animation() {
         out.frameFunction_(canvas);
         recording = true;
       }
-
 
       // if we have exceeded the maximum duration, move on to the next animation
       if (time - startTime > out.maxDuration / 1000 + out.delayAtEnd_ / 1000) {
@@ -494,7 +493,9 @@ export function animation() {
               recording = false;
               frameLoop.cancel();
               regl.destroy();
-              animationLoop = function () { return; }
+              animationLoop = function () {
+                return;
+              };
             }
           } else {
             animationLoop(layouts, points);
@@ -502,7 +503,6 @@ export function animation() {
         } else {
           animationLoop(layouts, points);
         }
-
       }
     });
     return out;
@@ -523,8 +523,8 @@ export function animation() {
         type: "LineString",
         coordinates: [
           [xExtent[0], yExtent[0]],
-          [xExtent[1], yExtent[1]]
-        ]
+          [xExtent[1], yExtent[1]],
+        ],
       };
 
       if (!out.projectionFunction_) {
@@ -570,7 +570,7 @@ export function animation() {
       point.x = Math.floor(Math.random() * out.width_);
       point.y = Math.floor(Math.random() * out.height_);
       point.colorEnd = point.color;
-    })
+    });
 
     return out;
   }
@@ -581,16 +581,18 @@ export function animation() {
       let u = i / csvData.length;
       let angle = u * Math.PI * 2.0; // goes from 0 to 2PI
       let radius = 100;
-      point.x = ((Math.sin(angle) * radius) + out.width_ / 2);
-      point.y = ((Math.cos(angle) * radius) + out.height_ / 2);
+      point.x = Math.sin(angle) * radius + out.width_ / 2;
+      point.y = Math.cos(angle) * radius + out.height_ / 2;
       point.colorEnd = point.color;
-    })
+    });
     return points;
   }
 
   function phyllotaxisLayout(points, csvData) {
     hideLabels();
-    let xOffset = out.width_ / 2, yOffset = out.height_ / 2, iOffset = 0;
+    let xOffset = out.width_ / 2,
+      yOffset = out.height_ / 2,
+      iOffset = 0;
     const theta = Math.PI * (3 - Math.sqrt(5));
     const pointRadius = out.pointWidth_ / 2;
 
@@ -603,7 +605,7 @@ export function animation() {
       point.x = xOffset + phylloX - pointRadius;
       point.y = yOffset + phylloY - pointRadius;
       point.colorEnd = point.color;
-    })
+    });
     return points;
   }
 
@@ -615,16 +617,18 @@ export function animation() {
     const yOffset = out.height_ / 2;
     const periods = 20;
 
-    const rScale = d3.scaleLinear()
+    const rScale = d3
+      .scaleLinear()
       .domain([0, points.length - 1])
       .range([0, Math.min(out.width_ / 2, out.height_ / 2) - out.pointWidth_]);
 
-    const thetaScale = d3.scaleLinear()
+    const thetaScale = d3
+      .scaleLinear()
       .domain([0, points.length - 1])
       .range([0, periods * 2 * Math.PI]);
 
     points.forEach((point, i) => {
-      point.x = rScale(i) * Math.cos(thetaScale(i)) + xOffset
+      point.x = rScale(i) * Math.cos(thetaScale(i)) + xOffset;
       point.y = rScale(i) * Math.sin(thetaScale(i)) + yOffset;
       point.colorEnd = point.color;
     });
@@ -636,7 +640,8 @@ export function animation() {
     const amplitude = 0.3 * (out.height_ / 2);
     const yOffset = out.height_ / 2;
     const periods = 3;
-    const yScale = d3.scaleLinear()
+    const yScale = d3
+      .scaleLinear()
       .domain([0, points.length - 1])
       .range([0, periods * 2 * Math.PI]);
 
@@ -716,8 +721,7 @@ export function animation() {
     let containerWidth = out.width_ - out.chartOffsetX_;
     var numBins = byValue.length;
     var minBinWidth = out.width_ / (numBins * 2.5);
-    var totalExtraWidth =
-      out.width_ - out.binMargin_ * (numBins - 1) - minBinWidth * numBins;
+    var totalExtraWidth = out.width_ - out.binMargin_ * (numBins - 1) - minBinWidth * numBins;
     //calculate bin widths
     var binWidths = byValue.map(function (d) {
       if (out.binWidth_) {
@@ -740,7 +744,7 @@ export function animation() {
         binWidth: binWidth,
         binStart: cumulativeBinWidth + i * out.binMargin_,
         binCount: 0,
-        binCols: Math.floor(binWidth / increment)
+        binCols: Math.floor(binWidth / increment),
       };
       cumulativeBinWidth += binWidth - 1;
       return bin;
@@ -767,7 +771,7 @@ export function animation() {
         return {
           x: d.x,
           y: d.y,
-          color: [0, 0, 0]
+          color: [0, 0, 0],
         };
       }
       var binWidth = bin.binWidth;
@@ -776,14 +780,14 @@ export function animation() {
       var binCols = bin.binCols;
       var row = Math.floor(binCount / binCols);
       var col = binCount % binCols;
-      var x = (binStart + col * increment);
+      var x = binStart + col * increment;
       var y = -row * increment + out.height_ + out.chartOffsetY_;
       bin.binCount += 1;
       if (y > bin.maxY) bin.maxY = y;
       return {
         x: x,
         y: y,
-        color: d.color
+        color: d.color,
       };
     });
 
@@ -818,7 +822,7 @@ export function animation() {
   // bar chart Y axis label
   function createLabelY(bin) {
     let labelY = bin.maxY + out.binLabelOffsetY_;
-    let labelX = (bin.binStart + bin.binWidth / 2) + out.binLabelOffsetX_;
+    let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
 
     //canvas labels
     // let text = out.binYLabelFunction_(bin)
@@ -840,9 +844,9 @@ export function animation() {
     let labelY = out.height_ + out.chartOffsetY_;
     let labelX;
     if (nextBin) {
-      labelX = (bin.binStart + bin.binWidth / 2) + out.binLabelOffsetX_;
+      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
     } else {
-      labelX = (bin.binStart + bin.binWidth / 2) + out.binLabelOffsetX_ + 10;
+      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + 10;
     }
     //html labels
     let div = document.createElement("div");
@@ -857,7 +861,6 @@ export function animation() {
     // let text = out.binXLabelFunction_(bin)
     // out.ctx.fillStyle = 'black';
     // out.ctx.fillText(text, labelX, labelY);
-
   }
 
   function createChartTitleX() {
@@ -905,8 +908,8 @@ export function animation() {
     1500: 0,
     3000: 0,
     7500: 0,
-    25000: 0
-  }
+    25000: 0,
+  };
   function colorDataByClass(data, csvData) {
     data.forEach(function (d, i) {
       classifyPoint(d, csvData[i], out.colors_, out.thresholds_);
@@ -921,7 +924,6 @@ export function animation() {
   }
   // add classification value and color properties to each GLpoint using values from csv
   function classifyPoint(glPoint, csvPoint, colors, stops) {
-
     for (let i = 0; i < stops.length; i++) {
       let stop = stops[i];
       if (i == stops.length - 1) {
@@ -942,7 +944,7 @@ export function animation() {
       }
     }
     if (!glPoint.color) {
-      glPoint.color = toVectorColor("grey")
+      glPoint.color = toVectorColor("grey");
     }
   }
 

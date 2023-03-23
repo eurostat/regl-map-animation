@@ -1,6 +1,6 @@
 .map-animation-container {
   font-family: 'Open Sans', "Helvetica Neue", Arial,"Noto Sans",sans-serif;
-  font-size:18px;
+  font-size:15px;
 }
 .regl-animation-legend {
   visibility: hidden;
@@ -11,10 +11,10 @@
   left: 5px;
   width: 199px;
   padding: 5px;
-  padding-top: 15px;
+  padding-top: 0px;
   background-color: white;
-  border: 1px solid black;
-  border-radius: 5px; 
+  border: 1px solid grey;
+  border-radius: 0px; 
 }
 .regl-animation-label {
   visibility: hidden;
@@ -24,8 +24,8 @@
   position: absolute;
   padding: 4px;
   background-color: white;
-  border: 1px solid black;
-   border-radius: 5px; 
+  border: 1px solid grey;
+   border-radius: 0px; 
 }
 .regl-animation-chart-title {
   visibility: hidden;
