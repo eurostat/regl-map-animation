@@ -3,8 +3,8 @@ const csv = require("csv-parser");
 const fs = require("fs");
 
 //define input and output file locations
-const inputFilePath = "input/pop_5000m.csv";
-const outputFilePath = "output/pop_5000m.csv";
+const inputFilePath = "input/X_pop_5000m.csv";
+const outputFilePath = "output/X_pop_5000m.csv";
 
 // set the headers you want for the output file..
 const csvWriter = createCsvWriter({
