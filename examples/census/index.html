@@ -50,7 +50,7 @@
           .container(container)
           //.canvas(canvas)
           .pointData(pointData)
-          .pointWidth(1)
+          .pointWidth(0.6)
           .pointMargin(0)
           .mapPadding(0)
           .width(width)
@@ -68,6 +68,7 @@
             let str = count.toLocaleString("en").replace(/,/gi, " ");
             return str + " km²";
           })
+          .initialAnimation("rollout")
           .binLabelOffsetX(50)
           .chartOffsetY(0)
           .legend(true)
