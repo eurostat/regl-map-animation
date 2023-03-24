@@ -19,6 +19,9 @@ export function animation() {
   out.pointData_ = null; // parsed point data [x,y,indicator]
   out.logoData_ = null; // for showing the point data as a logo
   out.logoColor_ = "#004494"; // The color of all logo points. Alternativley add a color column to the logo csv data
+  out.centerLogo_ = null;
+  out.logoWidth_ = 300;
+  out.logoHeight_ = 100;
   out.container_ = null; // HTML DIV element that REGL will use to render the animation and legend and chart labels
   out.canvas_ = null; // HTML canvas element that REGL will use to render the animation
   out.numPoints_ = null; // number of points to display
@@ -555,24 +558,28 @@ export function animation() {
     // logo points and data points need to be the same amount so we use d3 scale
     let logoIndexScale = d3.scaleLinear().domain([0, points.length]).range([0, logoData.length]);
 
-    // fit to container using d3scale
-    let xExtent = d3.extent(logoData, (d) => parseInt(d.x));
-    let yExtent = d3.extent(logoData, (d) => parseInt(d.y));
-    let logoXScale = d3
-      .scaleLinear()
-      .domain(xExtent)
-      .range([0 + out.mapPadding_, out.width_ - out.mapPadding_]);
-    let logoYScale = d3
-      .scaleLinear()
-      .domain(yExtent)
-      .range([out.height_ - out.mapPadding_, 0 + out.mapPadding_]);
+    // center to container using d3scale
+    let logoXScale, logoYScale;
+    if (out.centerLogo_) {
+      let xExtent = d3.extent(logoData, (d) => parseInt(d.x));
+      let yExtent = d3.extent(logoData, (d) => parseInt(d.y));
+      let screenCenter = { x: out.width_ / 2, y: out.height_ / 2 };
+      logoXScale = d3
+        .scaleLinear()
+        .domain(xExtent)
+        .range([screenCenter.x - out.logoWidth_, screenCenter.x + out.logoWidth_]);
+      logoYScale = d3
+        .scaleLinear()
+        .domain(yExtent)
+        .range([screenCenter.y - out.logoHeight_, screenCenter.y + out.logoHeight_]);
+    }
 
     points.forEach((point, i) => {
       let logoIndex = Math.floor(logoIndexScale(i)); // e.g. for when logoData has less items than pointsData
       let pointColor = logoData[logoIndex].color ? logoData[logoIndex].color : out.logoColor_;
       let glColor = toVectorColor(pointColor);
-      point.x = logoData[logoIndex].x;
-      point.y = logoData[logoIndex].y;
+      point.x = out.centerLogo_ ? logoXScale(logoData[logoIndex].x) : logoData[logoIndex].x;
+      point.y = out.centerLogo_ ? logoYScale(logoData[logoIndex].y) : logoData[logoIndex].y;
       point.color = glColor;
     });
 
