@@ -35,6 +35,9 @@
           x: +d.x,
         };
       }).then((pointData) => {
+        // order by Y
+        let sortedData = pointData.sort((a, b) => a.y - b.y); // b - a for reverse sort
+
         //make container fill screen
         let width = Math.min(window.innerWidth, 900);
         let height = Math.min(window.innerHeight, 600);
@@ -49,7 +52,7 @@
         ReglMapAnimation.animation()
           .container(container)
           //.canvas(canvas)
-          .pointData(pointData)
+          .pointData(sortedData)
           .pointWidth(0.6)
           .pointMargin(0)
           .mapPadding(0)
