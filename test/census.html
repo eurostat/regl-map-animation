@@ -16,16 +16,82 @@
       vertical-align: middle;
       height: 100vh;
       width: 100vw;
+      overflow: hidden;
     "
   >
     <div id="container">
       <!-- <canvas id="reglCanvas"></canvas> -->
     </div>
-    <script src="../../build/reglmapanimation.js"></script>
-    <iframe
-      height="500px"
-      width="500px"
-      src="https://eurostat.github.io/regl-map-animation/examples/census/"
-    ></iframe>
+    <script src="../build/reglmapanimation.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
+      integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      d3.csv("../assets/csv/2021/pop_5000m.csv", (d) => {
+        return {
+          value: d.pop,
+          y: +d.y,
+          x: +d.x,
+        };
+      }).then((pointData) => {
+        d3.csv("../assets/csv/logo.csv", (d, i) => {
+          return {
+            value: i,
+            y: +d.y,
+            x: +d.x,
+          };
+        }).then((logoData) => {
+          // order by Y
+          let sortedPointData = pointData.sort((a, b) => a.y - b.y); // b - a for reverse sort
+
+          //make container fill screen
+          let width = document.documentElement.clientWidth;
+          let height = document.documentElement.clientHeight - 150; // adjust for axis label
+          let container = document.getElementById("container");
+          container.style.height = height + "px";
+          container.style.width = width + "px";
+          // let canvas = document.getElementById("reglCanvas");
+          // canvas.style.height = height + "px";
+          // canvas.style.width = width + "px";
+
+          //animation
+          ReglMapAnimation.animation()
+            .container(container)
+            //.canvas(canvas)
+            .pointData(sortedPointData)
+            .logoData(logoData)
+            .pointWidth(0.6)
+            .pointMargin(0)
+            .mapPadding(0)
+            .width(width)
+            .height(height)
+            .colors(["#ffffb2", "#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"])
+            .thresholds([0, 1, 500, 1000, 5000, 10000])
+            .duration(1000)
+            .delayAtEnd(2000)
+            .xAxisTitle("Population (number of inhabitants per 25 km²)")
+            .xAxisTitleOffsetX(-150)
+            .yAxisTitle("Area (in km²)")
+            .binLabels(true)
+            .binMargin(0.001)
+            .binYLabelFunction(function (bin) {
+              let count = bin.binCount * 25;
+              let str = count.toLocaleString("en").replace(/,/gi, " ");
+              return str + " km²";
+            })
+            //.initialAnimation("rollout")
+            .binLabelOffsetX(52)
+            .chartOffsetY(0)
+            .legend(true)
+            .legendTitle("Population per 25 km²")
+            .legendHeight(200)
+            .legendFontSize(16)
+            //.initialAnimation("spiral")
+            .animate();
+        });
+      });
+    </script>
   </body>
 </html>
