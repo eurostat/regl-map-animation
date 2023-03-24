@@ -139,7 +139,7 @@ export function animation() {
     const toLogo = (points) => logoLayout(points, out.logoData_);
 
     //add data-driven colour
-    //colorDataByClass(points, csvData);
+    colorDataByClass(points, csvData);
 
     let layouts = [];
 
