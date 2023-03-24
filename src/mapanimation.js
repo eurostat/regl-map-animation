@@ -503,8 +503,13 @@ export function animation() {
         recording = true;
       }
 
+      let delay = Array.isArray(out.delayAtEnd_)
+        ? out.delayAtEnd_[currentLayout] / 1000
+        : out.delayAtEnd_ / 1000;
+      console.log(delay);
+
       // if we have exceeded the maximum duration, move on to the next animation
-      if (time - startTime > out.maxDuration / 1000 + out.delayAtEnd_ / 1000) {
+      if (time - startTime > out.maxDuration / 1000 + delay) {
         /*     console.log('done animating, moving to next layout'); */
 
         frameLoop.cancel();

@@ -73,7 +73,7 @@
             .colors(["#ffffb2", "#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"])
             .thresholds([0, 1, 500, 1000, 5000, 10000])
             .duration(1000)
-            .delayAtEnd(4000)
+            .delayAtEnd([500, 1000, 6000]) // for each transition (logo > map > chart), specify the delay at the end
             .xAxisTitle("Population (number of inhabitants per 25 km²)")
             .xAxisTitleOffsetX(-150)
             .yAxisTitleOffsetX(10)
