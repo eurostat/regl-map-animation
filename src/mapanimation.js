@@ -550,16 +550,16 @@ export function animation() {
     let logoIndexScale = d3.scaleLinear().domain([0, points.length]).range([0, logoData.length]);
 
     // fit to container using d3scale
-    let xExtent = d3.extent(logoData, (d) => parseInt(d.x));
-    let yExtent = d3.extent(logoData, (d) => parseInt(d.y));
-    let logoXScale = d3
-      .scaleLinear()
-      .domain(xExtent)
-      .range([0 + out.mapPadding_, out.width_ - out.mapPadding_]);
-    let logoYScale = d3
-      .scaleLinear()
-      .domain(yExtent)
-      .range([out.height_ - out.mapPadding_, 0 + out.mapPadding_]);
+    // let xExtent = d3.extent(logoData, (d) => parseInt(d.x));
+    // let yExtent = d3.extent(logoData, (d) => parseInt(d.y));
+    // let logoXScale = d3
+    //   .scaleLinear()
+    //   .domain(xExtent)
+    //   .range([0 + out.mapPadding_, out.width_ - out.mapPadding_]);
+    // let logoYScale = d3
+    //   .scaleLinear()
+    //   .domain(yExtent)
+    //   .range([out.height_ - out.mapPadding_, 0 + out.mapPadding_]);
 
     points.forEach((point, i) => {
       let logoIndex = Math.floor(logoIndexScale(i)); // e.g. for when logoData has less items than pointsData
