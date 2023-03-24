@@ -218,11 +218,13 @@ export function animation() {
     //title
     svg
       .append("text")
+      .attr("id", "regl-animation-legend-title")
       .style("fill", "black")
       .attr("x", padding)
       .attr("y", titleY)
       .attr("text-anchor", "left")
       .style("alignment-baseline", "middle")
+      .style("font-weight", "bold")
       .style("font-size", out.legendTitleFontSize_)
       .text(out.legendTitle_);
 
