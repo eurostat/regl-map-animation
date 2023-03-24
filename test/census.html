@@ -47,8 +47,11 @@
           let sortedPointData = pointData.sort((a, b) => a.y - b.y); // b - a for reverse sort
 
           //make container fill screen
-          let width = document.documentElement.clientWidth;
-          let height = document.documentElement.clientHeight - 150; // adjust for axis label
+          // let width = document.documentElement.clientWidth;
+          // let height = document.documentElement.clientHeight - 150; // adjust for axis label
+          let width = 800;
+          let height = 500; // adjust for axis label
+
           let container = document.getElementById("container");
           container.style.height = height + "px";
           container.style.width = width + "px";
