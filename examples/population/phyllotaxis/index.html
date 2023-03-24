@@ -1,69 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <!-- <meta http-equiv="X-UA-Compatible" content="ie=edge" /> -->
+    <title>Example</title>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width" />
-  <!-- <meta http-equiv="X-UA-Compatible" content="ie=edge" /> -->
-  <title>Example</title>
-</head>
+  <body>
+    <div id="container"></div>
+    <script src="../../../build/reglmapanimation.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
+      integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      d3.csv("../../../assets/csv/pop_grid_5km.csv", (d) => {
+        return {
+          value: d.value,
+          y: +d.y,
+          x: +d.x,
+        };
+      }).then((pointData) => {
+        //make container fill screen
+        let width = Math.min(window.innerWidth, 1200);
+        let height = Math.min(window.innerHeight, 900);
+        let container = document.getElementById("container");
+        container.style.height = height + "px";
+        container.style.width = width + "px";
 
-<body>
-  <div id="container"></div>
-  <script src="../../../build/reglmapanimation.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.0/d3.min.js"
-    integrity="sha256-m0QmIsBXcOMiETRmpT3qg2IQ/i0qazJA2miCHzOmS1Y=" crossorigin="anonymous"></script>
-  <script>
-    d3.csv("../../../assets/csv/pop_grid_5km.csv", d => {
-      return {
-        value: d.value,
-        y: +d.y,
-        x: +d.x
-      };
-    }).then(pointData => {
-      //make container fill screen
-      let width = Math.min(window.innerWidth, 1200);
-      let height = Math.min(window.innerHeight, 900);
-      let container = document.getElementById("container");
-      container.style.height = height + "px";
-      container.style.width = width + "px";
+        //animation
+        ReglMapAnimation.animation()
+          .container(container)
+          .pointData(pointData)
+          .width(width)
+          .height(height)
+          .colors([
+            //"#2d50a0",
+            "#00227a",
+            "#6487c3",
+            "rgb(142, 156, 180)",
+            "#f0cd91",
+            "rgb(235, 185, 98)",
+            "#e6a532",
+            "rgb(223, 138, 48)",
+            "#d76e2d",
+          ])
+          .thresholds([0, 1, 250, 750, 1500, 3000, 7500, 25000])
+          .duration(1000)
+          .delayAtEnd(2000)
+          .xAxisTitle("Population (number of people living per 25 km²)")
+          .yAxisTitle("Area (in km²)")
+          .binLabels(true)
+          .binYLabelFunction(function (bin) {
+            let count = bin.binCount * 25;
+            let str = count.toLocaleString("en").replace(/,/gi, " ");
+            return str + " km²";
+          })
 
-      //animation
-      ReglMapAnimation.animation()
-        .container(container)
-        .pointData(pointData)
-        .width(width)
-        .height(height)
-        .colors([
-          //"#2d50a0",
-          "#00227a",
-          "#6487c3",
-          "rgb(142, 156, 180)",
-          "#f0cd91",
-          "rgb(235, 185, 98)",
-          "#e6a532",
-          "rgb(223, 138, 48)",
-          "#d76e2d"
-        ])
-        .thresholds([0, 1, 250, 750, 1500, 3000, 7500, 25000])
-        .duration(1000)
-        .delayAtEnd(2000)
-        .xAxisTitle("Population (number of people living per 25 km²)")
-        .yAxisTitle("Area (in km²)")
-        .binLabels(true)
-        .binYLabelFunction(function (bin) {
-          let count = bin.binCount * 25;
-          let str = count.toLocaleString("en").replace(/,/gi, " ");
-          return str + " km²";
-        })
-        .binLabelOffsetX(40)
-        .chartOffsetY(-100)
-        .legend(true)
-        .legendTitle("Population per 25 km²")
-        .initialAnimation("phyllotaxis")
-        .animate();
-    });
-  </script>
-</body>
-
+          .chartOffsetY(-100)
+          .legend(true)
+          .legendTitle("Population per 25 km²")
+          .initialAnimation("phyllotaxis")
+          .animate();
+      });
+    </script>
+  </body>
 </html>

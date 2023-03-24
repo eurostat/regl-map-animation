@@ -48,7 +48,7 @@ export function animation() {
   out.yAxisTitle_ = null;
   out.xAxisTitleOffsetX_ = -250;
   out.yAxisTitleOffsetX_ = -50;
-  out.binLabelOffsetX_ = 40;
+  out.binLabelOffsetX_ = 0;
   out.binLabelOffsetY_ = -30;
   out.chartOffsetX_ = 100;
   out.chartOffsetY_ = -150;
