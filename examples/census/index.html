@@ -35,51 +35,61 @@
           x: +d.x,
         };
       }).then((pointData) => {
-        // order by Y
-        let sortedData = pointData.sort((a, b) => a.y - b.y); // b - a for reverse sort
+        d3.csv("../../assets/csv/logo.csv", (d, i) => {
+          return {
+            value: i,
+            y: +d.y,
+            x: +d.x,
+          };
+        }).then((logoData) => {
+          // order by Y
+          let sortedPointData = pointData.sort((a, b) => a.y - b.y); // b - a for reverse sort
 
-        //make container fill screen
-        let width = Math.min(window.innerWidth, 900);
-        let height = Math.min(window.innerHeight, 600);
-        let container = document.getElementById("container");
-        container.style.height = height + "px";
-        container.style.width = width + "px";
-        // let canvas = document.getElementById("reglCanvas");
-        // canvas.style.height = height + "px";
-        // canvas.style.width = width + "px";
+          //make container fill screen
+          let width = Math.min(window.innerWidth, 800);
+          let height = Math.min(window.innerHeight, 600);
+          let container = document.getElementById("container");
+          container.style.height = height + "px";
+          container.style.width = width + "px";
+          // let canvas = document.getElementById("reglCanvas");
+          // canvas.style.height = height + "px";
+          // canvas.style.width = width + "px";
 
-        //animation
-        ReglMapAnimation.animation()
-          .container(container)
-          //.canvas(canvas)
-          .pointData(sortedData)
-          .pointWidth(1)
-          .pointMargin(0)
-          .mapPadding(0)
-          .width(width)
-          .height(height)
-          .colors(["#ffffb2", "#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"])
-          .thresholds([0, 1, 500, 1000, 5000, 10000])
-          .duration(1200)
-          .delayAtEnd(3000)
-          .xAxisTitle("Population (number of inhabitants per 25 km²)")
-          .xAxisTitleOffsetX(-150)
-          .yAxisTitle("Area (in km²)")
-          .binLabels(true)
-          .binYLabelFunction(function (bin) {
-            let count = bin.binCount * 25;
-            let str = count.toLocaleString("en").replace(/,/gi, " ");
-            return str + " km²";
-          })
-          .initialAnimation("rollout")
-          .binLabelOffsetX(52)
-          .chartOffsetY(0)
-          .legend(true)
-          .legendTitle("Population per 25 km²")
-          .legendHeight(200)
-          .legendFontSize(16)
-          //.initialAnimation("spiral")
-          .animate();
+          //animation
+          ReglMapAnimation.animation()
+            .container(container)
+            //.canvas(canvas)
+            .pointData(sortedPointData)
+            .logoData(logoData)
+            .pointWidth(0.6)
+            .pointMargin(0)
+            .mapPadding(0)
+            .width(width)
+            .height(height)
+            .colors(["#ffffb2", "#fed976", "#feb24c", "#fd8d3c", "#f03b20", "#bd0026"])
+            .thresholds([0, 1, 500, 1000, 5000, 10000])
+            .duration(1000)
+            .delayAtEnd(2000)
+            .xAxisTitle("Population (number of inhabitants per 25 km²)")
+            .xAxisTitleOffsetX(-150)
+            .yAxisTitle("Area (in km²)")
+            .binLabels(true)
+            .binMargin(0.001)
+            .binYLabelFunction(function (bin) {
+              let count = bin.binCount * 25;
+              let str = count.toLocaleString("en").replace(/,/gi, " ");
+              return str + " km²";
+            })
+            //.initialAnimation("rollout")
+            .binLabelOffsetX(52)
+            .chartOffsetY(0)
+            .legend(true)
+            .legendTitle("Population per 25 km²")
+            .legendHeight(200)
+            .legendFontSize(16)
+            //.initialAnimation("spiral")
+            .animate();
+        });
       });
     </script>
   </body>

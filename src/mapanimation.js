@@ -17,6 +17,8 @@ export function animation() {
 
   // all of the following out[prop] properties are exposed as functions to the user and their values can therefore be overwritten at will.
   out.pointData_ = null; // parsed point data [x,y,indicator]
+  out.logoData_ = null; // for showing the point data as a logo
+  out.logoColor_ = "#004494"; // The color of all logo points. Alternativley add a color column to the logo csv data
   out.container_ = null; // HTML DIV element that REGL will use to render the animation and legend and chart labels
   out.canvas_ = null; // HTML canvas element that REGL will use to render the animation
   out.numPoints_ = null; // number of points to display
@@ -134,11 +136,19 @@ export function animation() {
     const toSpiral = (points) => spiralLayout(points, csvData);
     const toPhyllotaxis = (points) => phyllotaxisLayout(points, csvData);
     const toRollout = (points) => rolloutLayout(points, csvData);
+    const toLogo = (points) => logoLayout(points, out.logoData_);
 
-    //add colour
-    colorDataByClass(points, csvData);
+    //add data-driven colour
+    //colorDataByClass(points, csvData);
 
     let layouts = [];
+
+    //logo first
+    if (out.logoData_) {
+      logoLayout(points, out.logoData_);
+      layouts.push(toLogo);
+    }
+
     // initial layout
     if (out.initialAnimation_) {
       if (out.initialAnimation_ == "random") {
@@ -178,7 +188,7 @@ export function animation() {
     }
 
     //define order of transitions
-    layouts.push(toMap, toBars, toMap);
+    layouts.push(toMap, toBars);
 
     //define buffers
     // First we create buffers
@@ -527,7 +537,37 @@ export function animation() {
   }
 
   //LAYOUTS
+  /**
+   * Orders the points to show the eurostat logo
+   *
+   * @param {[{}]} points The formatted array of cell objects
+   * @param {[{}]} logoData The raw csv data input coordinates for the logo
+   */
+  function logoLayout(points, logoData) {
+    hideLabels();
 
+    // logo points and data points need to be the same amount so we use d3 scale
+    let logoIndexScale = d3.scaleLinear().domain([0, points.length]).range([0, logoData.length]);
+
+    points.forEach((point, i) => {
+      let logoIndex = Math.floor(logoIndexScale(i)); // e.g. for when logoData has less items than pointsData
+      let pointColor = logoData[logoIndex].color ? logoData[logoIndex].color : out.logoColor_;
+      let glColor = toVectorColor(pointColor);
+      point.x = logoData[logoIndex].x;
+      point.y = logoData[logoIndex].y;
+      point.color = glColor;
+    });
+
+    return out;
+  }
+
+  /**
+   * Redefines the point coordinates in order to show their positions on the map
+   *
+   * @param {[{}]} points The formatted array of cell objects
+   * @param {[{}]} csvData The raw csv data input
+   * @return {*}
+   */
   function mapLayout(points, csvData) {
     hideLabels();
     function projectData(data) {
@@ -719,8 +759,6 @@ export function animation() {
   //draw bar graph by defining point x/y based on pointclass value
   function barsLayout(points, csvData) {
     hideLegend();
-    var pointWidth = out.width_ / 800;
-    var pointMargin = out.pointMargin_;
     var byValue = d3
       .nest()
       .key(function (d) {
@@ -733,13 +771,13 @@ export function animation() {
       .sort(function (x, y) {
         return d3.ascending(parseInt(x.key), parseInt(y.key));
       });
-    if (out.binMargin_) {
+    if (!out.binMargin_) {
       out.binMargin_ = out.pointWidth_ * 10;
     }
     let containerWidth = out.width_ - out.chartOffsetX_;
-    var numBins = byValue.length;
-    var minBinWidth = out.width_ / (numBins * 2.5);
-    var totalExtraWidth = out.width_ - out.binMargin_ * (numBins - 1) - minBinWidth * numBins;
+    //var numBins = byValue.length;
+    //var minBinWidth = out.width_ / (numBins * 2.5);
+    //var totalExtraWidth = out.width_ - out.binMargin_ * (numBins - 1) - minBinWidth * numBins;
     //calculate bin widths
     var binWidths = byValue.map(function (d) {
       if (out.binWidth_) {
@@ -928,8 +966,16 @@ export function animation() {
     7500: 0,
     25000: 0,
   };
-  function colorDataByClass(data, csvData) {
-    data.forEach(function (d, i) {
+
+  /**
+   * Adds a color property to each point based on thresholds() and colors() classification settings
+   *
+   * @param {[{}]} points Foramtted point data
+   * @param {[{}]} csvData Raw csv data
+   * @return {*}
+   */
+  function colorDataByClass(points, csvData) {
+    points.forEach(function (d, i) {
       classifyPoint(d, csvData[i], out.colors_, out.thresholds_);
     });
     console.log(stats); //for counting
