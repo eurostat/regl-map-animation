@@ -20,11 +20,12 @@
   visibility: hidden;
   opacity: 0;
   transition: visibility 0.8s, opacity 0.8s linear;
-
+  transform: translate(-50%, 0); 
   position: absolute;
   padding: 4px;
   background-color: white;
-  border: 1px solid grey;
+  white-space: nowrap;
+  /* border: 1px solid grey; */
    border-radius: 0px; 
 }
 .regl-animation-chart-title {

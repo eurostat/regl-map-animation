@@ -208,6 +208,11 @@ export function animation() {
     }
   }
 
+  /**
+   * Adds a choropleth style legend to the containerDiv element for the thresholds and colors chosen
+   *
+   * @return {*}
+   */
   function addLegendToContainer() {
     let padding = 10;
     let svg = d3.create("svg");
@@ -245,6 +250,7 @@ export function animation() {
       .style("font-size", out.legendTitleFontSize_)
       .text(out.legendTitle_);
 
+    // squares
     svg
       .selectAll("mydots")
       .data(legendData)
@@ -253,7 +259,7 @@ export function animation() {
       .attr("x", padding)
       .attr("y", function (d, i) {
         return i * (size + 5) + titleYoffset;
-      }) // padding is where the first square appears. 25 is the distance between squares
+      })
       .attr("width", size)
       .attr("height", size)
       .style("fill", function (d) {
@@ -269,7 +275,7 @@ export function animation() {
       .style("font-size", out.legendFontSize_)
       .attr("x", padding + size * 1.2)
       .attr("y", function (d, i) {
-        return i * (size + 5) + size / 2 + titleYoffset;
+        return i * (size + 5) + titleYoffset + out.legendFontSize_ / 1.25;
       }) // padding is where the first label appears. 25 is the distance between labels
       .style("fill", "black")
       .text(function (d, i) {
@@ -550,16 +556,16 @@ export function animation() {
     let logoIndexScale = d3.scaleLinear().domain([0, points.length]).range([0, logoData.length]);
 
     // fit to container using d3scale
-    // let xExtent = d3.extent(logoData, (d) => parseInt(d.x));
-    // let yExtent = d3.extent(logoData, (d) => parseInt(d.y));
-    // let logoXScale = d3
-    //   .scaleLinear()
-    //   .domain(xExtent)
-    //   .range([0 + out.mapPadding_, out.width_ - out.mapPadding_]);
-    // let logoYScale = d3
-    //   .scaleLinear()
-    //   .domain(yExtent)
-    //   .range([out.height_ - out.mapPadding_, 0 + out.mapPadding_]);
+    let xExtent = d3.extent(logoData, (d) => parseInt(d.x));
+    let yExtent = d3.extent(logoData, (d) => parseInt(d.y));
+    let logoXScale = d3
+      .scaleLinear()
+      .domain(xExtent)
+      .range([0 + out.mapPadding_, out.width_ - out.mapPadding_]);
+    let logoYScale = d3
+      .scaleLinear()
+      .domain(yExtent)
+      .range([out.height_ - out.mapPadding_, 0 + out.mapPadding_]);
 
     points.forEach((point, i) => {
       let logoIndex = Math.floor(logoIndexScale(i)); // e.g. for when logoData has less items than pointsData
@@ -887,19 +893,20 @@ export function animation() {
     return out;
   }
 
-  // bar chart Y axis label
+  /**
+   * Creates a Y axis label for a specific bin (bar)
+   * Bordered labels
+   *
+   * @param {*} bin
+   *  @return {HTMLDivElement}
+   */
   function createLabelY(bin) {
     let labelY = bin.maxY + out.binLabelOffsetY_;
-    let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
-
-    //canvas labels
-    // let text = out.binYLabelFunction_(bin)
-    // out.ctx.fillStyle = 'black';
-    // out.ctx.fillText(text, labelX, labelY);
+    let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + out.chartOffsetX_;
 
     //html labels
     let div = document.createElement("div");
-    div.classList.add("regl-animation-label");
+    div.classList.add("regl-animation-label", "regl-chart-label-y");
     div.innerHTML = out.binYLabelFunction_(bin); //bin total
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
@@ -907,28 +914,30 @@ export function animation() {
     return div;
   }
 
-  // bar chart X axis label
+  /**
+   * Creates an X axis label for a specific bin (bar)
+   *
+   * @param {*} bin current bar data
+   * @param {*} nextBin {optional} next bar data
+   * @return {HTMLDivElement}
+   */
   function createLabelX(bin, nextBin) {
     let labelY = out.height_ + out.chartOffsetY_;
     let labelX;
     if (nextBin) {
-      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_;
+      // bar minX + bar width/2 + offsets
+      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + out.chartOffsetX_;
     } else {
-      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + 10;
+      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + 10 + out.chartOffsetX_;
     }
     //html labels
     let div = document.createElement("div");
     div.classList.add("regl-animation-label", "regl-chart-label-x");
-    div.innerHTML = out.binXLabelFunction_(bin, nextBin); //total
+    div.innerHTML = out.binXLabelFunction_(bin, nextBin); // bin total
     div.style.top = labelY + "px";
     div.style.left = labelX + "px";
     div.style.position = "absolute";
     return div;
-
-    //canvas labels
-    // let text = out.binXLabelFunction_(bin)
-    // out.ctx.fillStyle = 'black';
-    // out.ctx.fillText(text, labelX, labelY);
   }
 
   function createChartTitleX() {
