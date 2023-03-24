@@ -6,6 +6,7 @@ import { legendColor } from "d3-svg-legend";
 
 var regl = null;
 let recording = false;
+var positionStart, positionEnd, colorStart, colorEnd, index;
 
 /**
  * Main function to use when creating a animation
@@ -177,9 +178,15 @@ export function animation() {
     }
 
     //define order of transitions
-    // layouts.push(toMap); //order of animations
-    // layouts.push(toBars);
-    layouts.push(toMap, toBars);
+    layouts.push(toMap, toBars, toMap);
+
+    //define buffers
+    // First we create buffers
+    positionStart = regl.buffer(out.pointData_.length);
+    positionEnd = regl.buffer(out.pointData_.length);
+    colorStart = regl.buffer(out.pointData_.length);
+    colorEnd = regl.buffer(out.pointData_.length);
+    index = regl.buffer(out.pointData_.length);
 
     // start animation loop
     animationLoop(layouts, points);
@@ -373,12 +380,24 @@ export function animation() {
 			}
 			`,
 
+      //BUG: defining attributes dynamically creates a memory leak
+
       attributes: {
-        positionStart: points.map((d) => [d.sx, d.sy]),
-        positionEnd: points.map((d) => [d.tx, d.ty]),
-        colorStart: points.map((d) => d.colorStart),
-        colorEnd: points.map((d) => d.colorEnd),
-        index: d3.range(points.length),
+        positionStart: positionStart({
+          data: points.map((d) => [d.sx, d.sy]),
+        }),
+        positionEnd: positionEnd({
+          data: points.map((d) => [d.tx, d.ty]),
+        }),
+        colorStart: colorStart({
+          data: points.map((d) => d.colorStart),
+        }),
+        colorEnd: colorEnd({
+          data: points.map((d) => d.colorEnd),
+        }),
+        index: index({
+          data: d3.range(points.length),
+        }),
       },
 
       uniforms: {
@@ -418,9 +437,6 @@ export function animation() {
 
     // layout points
     layouts[currentLayout](points);
-
-    //change point width according to layout
-    let pointWidth = out.pointWidth_;
 
     // copy layout x y to end positions
     points.forEach((d, i) => {
