@@ -1,6 +1,6 @@
 {
   "name": "regl-map-animation",
-  "version": "1.2.13",
+  "version": "1.2.16",
   "description": "Configurable animation showing a transition from categorized geographic points on a map into a chart",
   "main": "build/reglmapanimation.min.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "url": "git+https://github.com/eurostat/regl-map-animation.git"
   },
   "files": [
-    "./build"
+    "build"
   ],
   "keywords": [
     "regl",

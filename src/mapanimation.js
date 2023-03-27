@@ -209,6 +209,16 @@ export function animation() {
       let canvas = out.container_;
       out.initFunction_(canvas);
     }
+
+    // handle context loss
+    regl.on("lost", function () {
+      console.log("lost webgl context. trying to re-animate");
+      out.animate();
+    });
+
+    regl.on("restore", function () {
+      console.log("webgl context restored");
+    });
   }
 
   /**
@@ -506,7 +516,7 @@ export function animation() {
       let delay = Array.isArray(out.delayAtEnd_)
         ? out.delayAtEnd_[currentLayout] / 1000
         : out.delayAtEnd_ / 1000;
-      console.log(delay);
+      //console.log(delay);
 
       // if we have exceeded the maximum duration, move on to the next animation
       if (time - startTime > out.maxDuration / 1000 + delay) {
@@ -1011,7 +1021,7 @@ export function animation() {
     points.forEach(function (d, i) {
       classifyPoint(d, csvData[i], out.colors_, out.thresholds_);
     });
-    console.log(stats); //for counting
+    //console.log(stats); //for counting
     return out;
   }
 
