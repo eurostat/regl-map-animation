@@ -1,12 +1,20 @@
 //Inspired by Peter Beshai: https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/
 
-import * as d3 from "d3";
+import {
+  range,
+  groups,
+  create,
+  ascending,
+  rgb,
+  extent,
+  scaleLinear,
+  rollup,
+} from "d3";
 import "./styles.css";
-import { legendColor } from "d3-svg-legend";
 
-var regl = null;
+let regl = null;
 let recording = false;
-var positionStart, positionEnd, colorStart, colorEnd, index;
+let positionStart, positionEnd, colorStart, colorEnd, index;
 
 /**
  * Main function to use when creating a animation
@@ -63,7 +71,11 @@ export function animation() {
       return "0";
     } else {
       if (nextBin) {
-        return formatStr(parseInt(bin.value)) + " to " + formatStr(parseInt(nextBin.value));
+        return (
+          formatStr(parseInt(bin.value)) +
+          " to " +
+          formatStr(parseInt(nextBin.value))
+        );
       } else {
         return "≥ " + formatStr(parseInt(bin.value));
       }
@@ -78,9 +90,9 @@ export function animation() {
   out.initialAnimation_ = false;
 
   //definition of generic accessors based on the name of each parameter name
-  for (var p in out)
+  for (let p in out)
     (function () {
-      var p_ = p;
+      let p_ = p;
       out[p_.substring(0, p_.length - 1)] = function (v) {
         if (!arguments.length) return out[p_];
         out[p_] = v;
@@ -129,7 +141,7 @@ export function animation() {
     if (out.legend_) addLegendToContainer(out);
 
     // create initial set of points from csv data
-    const points = d3.range(out.numPoints_).map((d) => ({}));
+    const points = range(out.numPoints_).map((d) => ({}));
 
     // define the functions that will manipulate the data
     const toMap = (points) => mapLayout(points, csvData);
@@ -228,7 +240,7 @@ export function animation() {
    */
   function addLegendToContainer() {
     let padding = 10;
-    let svg = d3.create("svg");
+    let svg = create("svg");
     svg.attr("class", "regl-animation-legend");
     //.attr("viewBox", "0 0 210 270");
     if (out.legendHeight_) {
@@ -247,7 +259,7 @@ export function animation() {
     }
 
     // Add one square in the legend for each name.
-    var size = 20;
+    let size = 20;
     let titleY = 20;
     let titleYoffset = 35;
     //title
@@ -425,7 +437,7 @@ export function animation() {
           data: points.map((d) => d.colorEnd),
         }),
         index: index({
-          data: d3.range(points.length),
+          data: range(points.length),
         }),
       },
 
@@ -571,30 +583,42 @@ export function animation() {
     hideLabels();
 
     // logo points and data points need to be the same amount so we use d3 scale
-    let logoIndexScale = d3.scaleLinear().domain([0, points.length]).range([0, logoData.length]);
+    let logoIndexScale = scaleLinear()
+      .domain([0, points.length])
+      .range([0, logoData.length]);
 
     // center to container using d3scale
     let logoXScale, logoYScale;
     if (out.centerLogo_) {
-      let xExtent = d3.extent(logoData, (d) => parseInt(d.x));
-      let yExtent = d3.extent(logoData, (d) => parseInt(d.y));
+      let xExtent = extent(logoData, (d) => parseInt(d.x));
+      let yExtent = extent(logoData, (d) => parseInt(d.y));
       let screenCenter = { x: out.width_ / 2, y: out.height_ / 2 };
-      logoXScale = d3
-        .scaleLinear()
+      logoXScale = scaleLinear()
         .domain(xExtent)
-        .range([screenCenter.x - out.logoWidth_, screenCenter.x + out.logoWidth_]);
-      logoYScale = d3
-        .scaleLinear()
+        .range([
+          screenCenter.x - out.logoWidth_,
+          screenCenter.x + out.logoWidth_,
+        ]);
+      logoYScale = scaleLinear()
         .domain(yExtent)
-        .range([screenCenter.y - out.logoHeight_, screenCenter.y + out.logoHeight_]);
+        .range([
+          screenCenter.y - out.logoHeight_,
+          screenCenter.y + out.logoHeight_,
+        ]);
     }
 
     points.forEach((point, i) => {
       let logoIndex = Math.floor(logoIndexScale(i)); // e.g. for when logoData has less items than pointsData
-      let pointColor = logoData[logoIndex].color ? logoData[logoIndex].color : out.logoColor_;
+      let pointColor = logoData[logoIndex].color
+        ? logoData[logoIndex].color
+        : out.logoColor_;
       let glColor = toVectorColor(pointColor);
-      point.x = out.centerLogo_ ? logoXScale(logoData[logoIndex].x) : logoData[logoIndex].x;
-      point.y = out.centerLogo_ ? logoYScale(logoData[logoIndex].y) : logoData[logoIndex].y;
+      point.x = out.centerLogo_
+        ? logoXScale(logoData[logoIndex].x)
+        : logoData[logoIndex].x;
+      point.y = out.centerLogo_
+        ? logoYScale(logoData[logoIndex].y)
+        : logoData[logoIndex].y;
       point.color = glColor;
     });
 
@@ -611,13 +635,13 @@ export function animation() {
   function mapLayout(points, csvData) {
     hideLabels();
     function projectData(data) {
-      var yExtent = d3.extent(csvData, function (d) {
+      let yExtent = extent(csvData, function (d) {
         return parseInt(d.y);
       });
-      var xExtent = d3.extent(csvData, function (d) {
+      let xExtent = extent(csvData, function (d) {
         return parseInt(d.x);
       });
-      var extentGeoJson = {
+      let extentGeoJson = {
         type: "LineString",
         coordinates: [
           [xExtent[0], yExtent[0]],
@@ -625,21 +649,20 @@ export function animation() {
         ],
       };
 
+      let xScale3035, yScale3035;
       if (!out.projectionFunction_) {
         //use d3 scaling to transform coords if no projection is specified
-        var xScale3035 = d3
-          .scaleLinear()
+        xScale3035 = scaleLinear()
           .domain(xExtent) // unit: km
           .range([0 + out.mapPadding_, out.width_ - out.mapPadding_]); // unit: pixels
-        var yScale3035 = d3
-          .scaleLinear()
+        yScale3035 = scaleLinear()
           .domain(yExtent) // unit: km
           .range([out.height_ - out.mapPadding_, 0 + out.mapPadding_]); // unit: pixels
       }
 
       //project points
       data.forEach(function (d, i) {
-        var point = csvData[i];
+        let point = csvData[i];
         let location;
         if (out.projectionFunction_) {
           location = out.projectionFunction_([point.x, point.y]);
@@ -715,13 +738,11 @@ export function animation() {
     const yOffset = out.height_ / 2;
     const periods = 20;
 
-    const rScale = d3
-      .scaleLinear()
+    const rScale = scaleLinear()
       .domain([0, points.length - 1])
       .range([0, Math.min(out.width_ / 2, out.height_ / 2) - out.pointWidth_]);
 
-    const thetaScale = d3
-      .scaleLinear()
+    const thetaScale = scaleLinear()
       .domain([0, points.length - 1])
       .range([0, periods * 2 * Math.PI]);
 
@@ -738,8 +759,7 @@ export function animation() {
     const amplitude = 0.3 * (out.height_ / 2);
     const yOffset = out.height_ / 2;
     const periods = 3;
-    const yScale = d3
-      .scaleLinear()
+    const yScale = scaleLinear()
       .domain([0, points.length - 1])
       .range([0, periods * 2 * Math.PI]);
 
@@ -762,12 +782,12 @@ export function animation() {
     let labels = document.getElementsByClassName("regl-animation-label");
     let titles = document.getElementsByClassName("regl-animation-chart-title");
     if (titles.length) {
-      for (var i = 0; i < titles.length; i++) {
+      for (let i = 0; i < titles.length; i++) {
         titles[i].classList.remove("visible");
       }
     }
     if (labels.length) {
-      for (var i = 0; i < labels.length; i++) {
+      for (let i = 0; i < labels.length; i++) {
         labels[i].classList.remove("visible");
       }
     }
@@ -784,12 +804,12 @@ export function animation() {
     let labels = document.getElementsByClassName("regl-animation-label");
     let titles = document.getElementsByClassName("regl-animation-chart-title");
     if (titles.length) {
-      for (var i = 0; i < titles.length; i++) {
+      for (let i = 0; i < titles.length; i++) {
         titles[i].classList.add("visible");
       }
     }
     if (labels.length) {
-      for (var i = 0; i < labels.length; i++) {
+      for (let i = 0; i < labels.length; i++) {
         labels[i].classList.add("visible");
       }
     }
@@ -799,31 +819,25 @@ export function animation() {
   //draw bar graph by defining point x/y based on pointclass value
   function barsLayout(points, csvData) {
     hideLegend();
-    var byValue = d3
-      .nest()
-      .key(function (d) {
-        return d.class;
-      })
-      .entries(points)
-      // .filter(function (d) {
-      //   return d.values.length > 10;
-      // })
-      .sort(function (x, y) {
-        return d3.ascending(parseInt(x.key), parseInt(y.key));
-      });
+    let byValue = groups(points, (val) => val.class).sort(function (x, y) {
+      return ascending(parseInt(x[0]), parseInt(y[0]));
+    });
     if (!out.binMargin_) {
       out.binMargin_ = out.pointWidth_ * 10;
     }
     let containerWidth = out.width_ - out.chartOffsetX_;
-    //var numBins = byValue.length;
-    //var minBinWidth = out.width_ / (numBins * 2.5);
-    //var totalExtraWidth = out.width_ - out.binMargin_ * (numBins - 1) - minBinWidth * numBins;
+    //let numBins = byValue.length;
+    //let minBinWidth = out.width_ / (numBins * 2.5);
+    //let totalExtraWidth = out.width_ - out.binMargin_ * (numBins - 1) - minBinWidth * numBins;
     //calculate bin widths
-    var binWidths = byValue.map(function (d) {
+    let binWidths = byValue.map(function (d) {
       if (out.binWidth_) {
         return out.binWidth_;
       } else {
-        return (containerWidth - out.binMargin_ * out.thresholds_.length) / out.thresholds_.length;
+        return (
+          (containerWidth - out.binMargin_ * out.thresholds_.length) /
+          out.thresholds_.length
+        );
       }
 
       // return (
@@ -832,11 +846,11 @@ export function animation() {
       // );
     });
     /*   console.log(binWidths); */
-    var increment = out.pointWidth_ + out.pointMargin_;
-    var cumulativeBinWidth = 0;
-    var binsArray = binWidths.map(function (binWidth, i) {
-      var bin = {
-        value: byValue[i].key,
+    let increment = out.pointWidth_ + out.pointMargin_;
+    let cumulativeBinWidth = 0;
+    let binsArray = binWidths.map(function (binWidth, i) {
+      let bin = {
+        value: byValue[i][0],
         binWidth: binWidth,
         binStart: cumulativeBinWidth + i * out.binMargin_,
         binCount: 0,
@@ -845,21 +859,20 @@ export function animation() {
       cumulativeBinWidth += binWidth - 1;
       return bin;
     });
-    var bins = d3
-      .nest()
-      .key(function (d) {
-        return d.value;
-      })
-      .rollup(function (d) {
-        return d[0];
-      })
-      .object(binsArray);
+
+    //“reduce” each group by computing a corresponding summary value, such as a sum or count.
+
+    // [bin, bin, bin] into {500 : bin, 1000: bin}
+    let bins = {};
+    binsArray.map((bin) => {
+      bins[bin.value] = bin;
+    });
+
     //console.log("got bins", bins);
     colorDataByClass(points, csvData);
 
-    var arrangement = points.map(function (d, i) {
-      var value = d.class;
-      var bin = bins[value];
+    let arrangement = points.map(function (d, i) {
+      let bin = bins[d.class];
       //for labelling
       bin.maxY = 0;
 
@@ -870,14 +883,14 @@ export function animation() {
           color: [0, 0, 0],
         };
       }
-      var binWidth = bin.binWidth;
-      var binCount = bin.binCount;
-      var binStart = bin.binStart + out.chartOffsetX_;
-      var binCols = bin.binCols;
-      var row = Math.floor(binCount / binCols);
-      var col = binCount % binCols;
-      var x = binStart + col * increment;
-      var y = -row * increment + out.height_ + out.chartOffsetY_;
+      let binWidth = bin.binWidth;
+      let binCount = bin.binCount;
+      let binStart = bin.binStart + out.chartOffsetX_;
+      let binCols = bin.binCols;
+      let row = Math.floor(binCount / binCols);
+      let col = binCount % binCols;
+      let x = binStart + col * increment;
+      let y = -row * increment + out.height_ + out.chartOffsetY_;
       bin.binCount += 1;
       if (y > bin.maxY) bin.maxY = y;
       return {
@@ -887,6 +900,7 @@ export function animation() {
       };
     });
 
+    // update our points array values
     arrangement.forEach(function (d, i) {
       Object.assign(points[i], d);
     });
@@ -924,7 +938,11 @@ export function animation() {
    */
   function createLabelY(bin) {
     let labelY = bin.maxY + out.binLabelOffsetY_;
-    let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + out.chartOffsetX_;
+    let labelX =
+      bin.binStart +
+      bin.binWidth / 2 +
+      out.binLabelOffsetX_ +
+      out.chartOffsetX_;
 
     //html labels
     let div = document.createElement("div");
@@ -948,9 +966,18 @@ export function animation() {
     let labelX;
     if (nextBin) {
       // bar minX + bar width/2 + offsets
-      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + out.chartOffsetX_;
+      labelX =
+        bin.binStart +
+        bin.binWidth / 2 +
+        out.binLabelOffsetX_ +
+        out.chartOffsetX_;
     } else {
-      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + 10 + out.chartOffsetX_;
+      labelX =
+        bin.binStart +
+        bin.binWidth / 2 +
+        out.binLabelOffsetX_ +
+        10 +
+        out.chartOffsetX_;
     }
     //html labels
     let div = document.createElement("div");
@@ -1026,8 +1053,8 @@ export function animation() {
   }
 
   function toVectorColor(colorStr) {
-    var rgb = d3.rgb(colorStr);
-    return [rgb.r / 255, rgb.g / 255, rgb.b / 255];
+    let color = rgb(colorStr);
+    return [color.r / 255, color.g / 255, color.b / 255];
   }
   // add classification value and color properties to each GLpoint using values from csv
   function classifyPoint(glPoint, csvPoint, colors, stops) {

@@ -12,7 +12,7 @@ Animate x/y point data using [regl](https://github.com/regl-project/regl) and ca
 
 ## Examples
 
-[Population grid of Europe](https://eurostat.github.io/regl-map-animation/examples/population/) | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/population/index.html)
+[Population grid of Europe](https://eurostat.github.io/regl-map-animation/examples/census/) | [code](https://github.com/eurostat/regl-map-animation/blob/master/examples/census/index.html)
 
 ### Different animation patterns
 
