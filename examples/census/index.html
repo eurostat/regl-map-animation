@@ -44,7 +44,6 @@
         }).then((logoData) => {
           // order by Y
           let sortedPointData = pointData.sort((a, b) => a.y - b.y); // b - a for reverse sort
-          //let sortedLogoData = logoData.sort((a, b) => a.y - b.y); // b - a for reverse sort
 
           //make container fill screen
           let width = Math.min(window.innerWidth, 800);
@@ -52,14 +51,10 @@
           let container = document.getElementById("container");
           container.style.height = height + "px";
           container.style.width = width + "px";
-          // let canvas = document.getElementById("reglCanvas");
-          // canvas.style.height = height + "px";
-          // canvas.style.width = width + "px";
 
           //animation
           ReglMapAnimation.animation()
             .container(container)
-            //.canvas(canvas)
             .pointData(sortedPointData)
             .logoData(logoData)
             .centerLogo(true)
@@ -80,7 +75,7 @@
             ])
             .thresholds([0, 1, 500, 2500, 12500, 62500])
             .duration(1000)
-            .delayAtEnd([500, 1000, 6000]) // for each transition (logo > map > chart), specify the delay at the end
+            .delayAtEnd([500, 4000, 6000]) // for each transition (logo > map > chart), specify the delay at the end
             .xAxisTitle("Population (number of inhabitants per 25 km²)")
             .xAxisTitleOffsetX(-150)
             .yAxisTitleOffsetX(10)
@@ -99,7 +94,6 @@
             .legendTitle("Population per 25 km²")
             .legendHeight(200)
             .legendFontSize(16)
-            //.initialAnimation("spiral")
             .animate();
         });
       });
