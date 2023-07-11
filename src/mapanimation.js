@@ -1,16 +1,9 @@
 //Inspired by Peter Beshai: https://peterbeshai.com/blog/2017-05-26-beautifully-animate-points-with-webgl-and-regl/
 
-import {
-  range,
-  groups,
-  create,
-  ascending,
-  rgb,
-  extent,
-  scaleLinear,
-  rollup,
-} from "d3";
+import { range, groups, ascending, rgb, extent, scaleLinear, rollup } from "d3";
 import "./styles.css";
+import * as Legend from "./legend";
+import * as Utils from "./utils";
 
 let regl = null;
 let recording = false;
@@ -49,7 +42,7 @@ export function animation() {
   out.legendHeight_ = 250;
   out.legendFontSize_ = 14;
   out.legendTitleFontSize_ = 18;
-  out.binLabels_ = true;
+  out.binLabels_ = true; // add labels on top of each bin
   out.binWidth_ = null;
   out.binMargin_ = null;
   out.xAxisTitle_ = null;
@@ -72,15 +65,16 @@ export function animation() {
     } else {
       if (nextBin) {
         return (
-          formatStr(parseInt(bin.value)) +
+          Utils.formatStr(parseInt(bin.value)) +
           " to " +
-          formatStr(parseInt(nextBin.value))
+          Utils.formatStr(parseInt(nextBin.value))
         );
       } else {
-        return "≥ " + formatStr(parseInt(bin.value));
+        return "≥ " + Utils.formatStr(parseInt(bin.value));
       }
     }
   };
+
   //functions for user to define
   out.frameFunction_ = null;
   out.endFunction_ = null;
@@ -88,6 +82,9 @@ export function animation() {
 
   //define initial animation
   out.initialAnimation_ = false;
+
+  // debugging
+  let stats = {};
 
   //definition of generic accessors based on the name of each parameter name
   for (let p in out)
@@ -138,7 +135,7 @@ export function animation() {
     out.maxDuration = out.duration_ + out.delayByIndex * out.numPoints_;
 
     //add legend
-    if (out.legend_) addLegendToContainer(out);
+    if (out.legend_) Legend.addLegendToContainer(out);
 
     // create initial set of points from csv data
     const points = range(out.numPoints_).map((d) => ({}));
@@ -231,96 +228,6 @@ export function animation() {
     regl.on("restore", function () {
       console.log("webgl context restored");
     });
-  }
-
-  /**
-   * Adds a choropleth style legend to the containerDiv element for the thresholds and colors chosen
-   *
-   * @return {*}
-   */
-  function addLegendToContainer() {
-    let padding = 10;
-    let svg = create("svg");
-    svg.attr("class", "regl-animation-legend");
-    //.attr("viewBox", "0 0 210 270");
-    if (out.legendHeight_) {
-      svg.style("height", out.legendHeight_ + "px");
-    }
-    out.container_.appendChild(svg.node());
-
-    // create a list of keys
-    let legendData = [];
-    for (let i = 0; i < out.thresholds_.length; i++) {
-      legendData.push({
-        stop: out.thresholds_[i],
-        color: out.colors_[i],
-        index: i,
-      });
-    }
-
-    // Add one square in the legend for each name.
-    let size = 20;
-    let titleY = 20;
-    let titleYoffset = 35;
-    //title
-    svg
-      .append("text")
-      .attr("id", "regl-animation-legend-title")
-      .style("fill", "black")
-      .attr("x", padding)
-      .attr("y", titleY)
-      .attr("text-anchor", "left")
-      .style("alignment-baseline", "middle")
-      .style("font-weight", "bold")
-      .style("font-size", out.legendTitleFontSize_)
-      .text(out.legendTitle_);
-
-    // squares
-    svg
-      .selectAll("mydots")
-      .data(legendData)
-      .enter()
-      .append("rect")
-      .attr("x", padding)
-      .attr("y", function (d, i) {
-        return i * (size + 5) + titleYoffset;
-      })
-      .attr("width", size)
-      .attr("height", size)
-      .style("fill", function (d) {
-        return d.color;
-      });
-
-    // Add one label in the legend for each name.
-    svg
-      .selectAll("mylabels")
-      .data(legendData)
-      .enter()
-      .append("text")
-      .style("font-size", out.legendFontSize_)
-      .attr("x", padding + size * 1.2)
-      .attr("y", function (d, i) {
-        return i * (size + 5) + titleYoffset + out.legendFontSize_ / 1.25;
-      }) // padding is where the first label appears. 25 is the distance between labels
-      .style("fill", "black")
-      .text(function (d, i) {
-        if (i !== legendData.length - 1) {
-          if (d.stop == 0) {
-            return formatStr(d.stop);
-          }
-          return formatStr(d.stop) + " to " + formatStr(legendData[i + 1].stop);
-        } else {
-          return "≥ " + formatStr(d.stop);
-        }
-      })
-      .attr("text-anchor", "left")
-      .style("alignment-baseline", "middle");
-
-    return out;
-  }
-
-  function formatStr(s) {
-    return s.toLocaleString("en").replace(/,/gi, " ");
   }
 
   // function to compile a draw points regl func
@@ -679,7 +586,7 @@ export function animation() {
 
     //show legend at end of transition
     setTimeout(function () {
-      showLegend();
+      Legend.showLegend();
     }, out.duration_);
 
     return out;
@@ -771,13 +678,6 @@ export function animation() {
     return points;
   }
 
-  function hideLegend() {
-    let el = document.getElementsByClassName("regl-animation-legend")[0];
-    if (el) {
-      el.classList.remove("visible");
-    }
-    return out;
-  }
   function hideLabels() {
     let labels = document.getElementsByClassName("regl-animation-label");
     let titles = document.getElementsByClassName("regl-animation-chart-title");
@@ -793,13 +693,11 @@ export function animation() {
     }
     return out;
   }
-  function showLegend() {
-    if (document.getElementsByClassName("regl-animation-legend")[0]) {
-      let el = document.getElementsByClassName("regl-animation-legend")[0];
-      el.classList.add("visible");
-    }
-    return out;
-  }
+
+  /**
+   * @description Set animation labels to visible
+   * @return {*}
+   */
   function showLabels() {
     let labels = document.getElementsByClassName("regl-animation-label");
     let titles = document.getElementsByClassName("regl-animation-chart-title");
@@ -818,7 +716,7 @@ export function animation() {
 
   //draw bar graph by defining point x/y based on pointclass value
   function barsLayout(points, csvData) {
-    hideLegend();
+    Legend.hideLegend();
     let byValue = groups(points, (val) => val.class).sort(function (x, y) {
       return ascending(parseInt(x[0]), parseInt(y[0]));
     });
@@ -989,6 +887,10 @@ export function animation() {
     return div;
   }
 
+  /**
+   * @description creates a title element for the X axis
+   * @return {HTMLDivElement}
+   */
   function createChartTitleX() {
     let labelY = out.height_ + out.chartOffsetY_ + 40;
     let labelX = out.width_ / 2 + out.xAxisTitleOffsetX_;
@@ -1007,6 +909,10 @@ export function animation() {
     return div;
   }
 
+  /**
+   * @description creates a title element for the Y axis
+   * @return {HTMLDivElement}
+   */
   function createChartTitleY() {
     let div = document.createElement("div");
     div.id = "regl-chart-title-Y";
@@ -1025,17 +931,6 @@ export function animation() {
     div.style.position = "absolute";
     return div;
   }
-
-  let stats = {
-    0: 0,
-    1: 0,
-    250: 0,
-    750: 0,
-    1500: 0,
-    3000: 0,
-    7500: 0,
-    25000: 0,
-  };
 
   /**
    * Adds a color property to each point based on thresholds() and colors() classification settings
