@@ -1,6 +1,6 @@
 .map-animation-container {
-  font-family: 'Open Sans', "Helvetica Neue", Arial,"Noto Sans",sans-serif;
-  font-size:15px;
+  font-family: "Open Sans", "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  font-size: 15px;
 }
 .regl-animation-legend {
   visibility: hidden;
@@ -9,24 +9,24 @@
   position: absolute;
   top: 5px;
   left: 5px;
-  width: 199px;
+  width: 220px;
   padding: 5px;
   padding-top: 0px;
   background-color: white;
   /* border: 1px solid grey; */
-  border-radius: 0px; 
+  border-radius: 0px;
 }
 .regl-animation-label {
   visibility: hidden;
   opacity: 0;
   transition: visibility 0.8s, opacity 0.8s linear;
-  transform: translate(-50%, 0); 
+  transform: translate(-50%, 0);
   position: absolute;
   padding: 4px;
   background-color: white;
   white-space: nowrap;
   /* border: 1px solid grey; */
-   border-radius: 0px; 
+  border-radius: 0px;
 }
 .regl-animation-chart-title {
   visibility: hidden;
