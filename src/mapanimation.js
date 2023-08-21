@@ -74,6 +74,22 @@ export function animation() {
       }
     }
   };
+  out.legendLabelFunction_ = function (d, i) {
+    if (i !== 0) {
+      //isnt first
+      if (d.stop == 0) {
+        return Utils.formatStr(d.stop);
+      }
+      return (
+        Utils.formatStr(d.stop) +
+        " to " +
+        Utils.formatStr(out.thresholds_[d.index + 1])
+      );
+    } else {
+      //is first
+      return "≥ " + Utils.formatStr(d.stop);
+    }
+  };
 
   //functions for user to define
   out.frameFunction_ = null;

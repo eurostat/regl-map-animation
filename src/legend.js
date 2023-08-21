@@ -71,20 +71,7 @@ export function addLegendToContainer(out) {
       return i * (size + 5) + titleYoffset + out.legendFontSize_ / 1.25;
     }) // padding is where the first label appears. 25 is the distance between labels
     .style("fill", "black")
-    .text(function (d, i) {
-      if (i !== legendData.length - 1) {
-        if (d.stop == 0) {
-          return Utils.formatStr(d.stop);
-        }
-        return (
-          Utils.formatStr(legendData[i + 1].stop) +
-          " to " +
-          Utils.formatStr(d.stop)
-        );
-      } else {
-        return "≥ " + Utils.formatStr(d.stop);
-      }
-    })
+    .text((d, i) => out.legendLabelFunction_(d, i))
     .attr("text-anchor", "left")
     .style("alignment-baseline", "middle");
 
