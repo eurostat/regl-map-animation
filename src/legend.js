@@ -33,7 +33,7 @@ export function addLegendToContainer(out) {
   //title
   svg
     .append("text")
-    .attr("id", "regl-animation-legend-title")
+    .attr("class", "regl-animation-legend-title")
     .style("fill", "black")
     .attr("x", padding)
     .attr("y", titleY)
@@ -65,6 +65,7 @@ export function addLegendToContainer(out) {
     .data(legendData)
     .enter()
     .append("text")
+    .attr("class", "regl-animation-legend-label")
     .style("font-size", out.legendFontSize_)
     .attr("x", padding + size * 1.2)
     .attr("y", function (d, i) {

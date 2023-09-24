@@ -1,3 +1,26 @@
+/* mobile */
+@media only screen and (max-device-width: 480px){
+  .regl-animation-legend-label, .regl-animation-label{
+    font-size:11px !important
+  }
+  .regl-chart-label-x {
+    font-size: 9px !important
+  }
+  .regl-animation-chart-title, .regl-animation-legend-title {
+    font-size:13px !important
+  }
+  .regl-animation-legend{
+    background-color: transparent !important
+  }
+}
+
+
+.regl-chart-label-x {
+  font-size: 13px;
+}
+
+
+
 .map-animation-container {
   font-family: "Open Sans", "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   font-size: 15px;
@@ -51,3 +74,4 @@
   opacity: 0.8;
   visibility: visible;
 }
+

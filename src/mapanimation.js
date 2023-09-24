@@ -51,11 +51,13 @@ export function animation() {
   out.yAxisTitleOffsetX_ = -50;
   out.binLabelOffsetX_ = 0;
   out.binLabelOffsetY_ = -30;
-  out.chartOffsetX_ = 100;
+  out.chartOffsetX_ = 60;
   out.chartOffsetY_ = -150;
   out.binYLabelFunction_ = function (bin) {
     return Math.round(bin.binCount); // return bin count by default
   };
+
+  //let delimiter = (out.width_ < 480 ? "-" : " to ")
   out.binXLabelFunction_ = function (bin, nextBin) {
     // deafult x axis labels
     if (bin.value == null) {

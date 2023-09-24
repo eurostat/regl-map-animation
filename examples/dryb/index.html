@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <!-- <meta http-equiv="X-UA-Compatible" content="ie=edge" /> -->
+    <title>Census 2021 population grid animation</title>
+  </head>
+
+  <body
+    style="
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto;
+      vertical-align: middle;
+      height: 100vh;
+      width: 100vw;
+    "
+  >
+    <div class="wrapper">
+      <div id="animation-container" style="aspect-ratio: 4 / 3"></div>
+    </div>
+
+    <script src="../../build/reglmapanimation.js"></script>
+    <script src="./d3.min.js"></script>
+    <script>
+      d3.csv("./pop_5000m.csv", (d) => {
+        return {
+          value: d.pop,
+          y: +d.y,
+          x: +d.x,
+        };
+      }).then((pointData) => {
+        // order by Y
+        let sortedPointData = pointData.sort((a, b) => a.y - b.y); // b - a for reverse sort
+
+        //make container fill screen
+        let width = Math.min(window.innerWidth, 800);
+        //let height = Math.min(window.innerHeight, 600);
+        //if (height > width) height = width;
+        let container = document.getElementById("animation-container");
+        //container.style.height = height + "px";
+        container.style.width = width + "px";
+        let containerBbox = container.getBoundingClientRect();
+
+        //animation
+        ReglMapAnimation.animation()
+          .container(container)
+          .pointData(sortedPointData)
+          //.logoData(logoData)
+          //.centerLogo(true)
+          //.logoWidth(300)
+          //.logoHeight(40)
+          .pointWidth(width < 480 ? 0.4 : 0.7)
+          //.pointMargin(0)
+          .mapPadding(0)
+          .width(width)
+          .height(containerBbox.height)
+          .colors([
+            "#ffeb99",
+            "#c7e9b4",
+            "#7fcdbb",
+            "#41b6c4",
+            "#104f99",
+            "#17256b",
+          ])
+          .thresholds([0, 1, 500, 2500, 12500, 62500])
+          .duration(1000)
+          .delayAtEnd([500, 4000, 6000]) // for each transition (logo > map > chart), specify the delay at the end
+          .xAxisTitle("Population (number of inhabitants per 25 km²)")
+          .xAxisTitleOffsetX(width < 480 ? -140 : -160)
+          .yAxisTitleOffsetX(width < 480 ? -15 : -45)
+          .yAxisTitle("Area (in km²)")
+          .binLabels(true)
+          .binMargin(0.001)
+          .binYLabelFunction(function (bin) {
+            let count = bin.binCount * 25;
+            let str = count.toLocaleString("en").replace(/,/gi, "\xA0");
+            return str + " km²";
+          })
+          .initialAnimation("rollout")
+          .binLabelOffsetX(0)
+          .chartOffsetY(-70)
+          .chartOffsetX(40)
+          .legend(true)
+          .legendTitle("Population per 25 km²")
+          .legendHeight(200)
+          .legendFontSize(16)
+          .animate();
+      });
+    </script>
+  </body>
+</html>
