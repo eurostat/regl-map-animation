@@ -5,6 +5,49 @@
     <meta name="viewport" content="width=device-width" />
     <!-- <meta http-equiv="X-UA-Compatible" content="ie=edge" /> -->
     <title>Census 2021 population grid animation</title>
+    <style>
+      .animation-titles {
+        text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
+        margin-bottom: 20px;
+      }
+      .title {
+        margin-bottom: 0.2rem;
+        color: #262b38;
+        font-size: 1.4rem;
+        font-weight: 600;
+        line-height: 1.2;
+        margin-top: 0;
+      }
+      .subtitle {
+        color: #262b38;
+        font-size: 1.1rem;
+        font-weight: 400;
+        line-height: 1.2;
+        margin-bottom: 0.2rem;
+        margin-top: 0;
+      }
+      /* mobile */
+      @media only screen and (max-device-width: 480px) {
+        .animation-titles {
+          margin-bottom: 80px;
+        }
+      }
+      /* tablet */
+      @media only screen and (max-device-width: 767px) {
+        .regl-animation-chart-title,
+        .regl-animation-legend-title {
+          font-size: 13px !important;
+        }
+        .regl-animation-label,
+        .regl-animation-legend-label {
+          font-size: 11px !important;
+        }
+        .regl-animation-legend {
+          background-color: transparent !important;
+        }
+      }
+    </style>
   </head>
 
   <body
@@ -19,6 +62,11 @@
     "
   >
     <div class="wrapper">
+      <!-- TITLE -->
+      <div class="animation-titles">
+        <h4 class="title">Population density, 2021</h4>
+        <h5 class="subtitle">(number of inhabitants per 25 km²)</h5>
+      </div>
       <div id="animation-container" style="aspect-ratio: 4 / 3"></div>
     </div>
 
@@ -52,7 +100,7 @@
           //.centerLogo(true)
           //.logoWidth(300)
           //.logoHeight(40)
-          .pointWidth(width < 480 ? 0.4 : 0.7)
+          .pointWidth(width < 480 ? 0.2 : 0.7)
           //.pointMargin(0)
           .mapPadding(0)
           .width(width)
@@ -69,7 +117,7 @@
           .duration(1000)
           .delayAtEnd([500, 4000, 6000]) // for each transition (logo > map > chart), specify the delay at the end
           .xAxisTitle("Population (number of inhabitants per 25 km²)")
-          .xAxisTitleOffsetX(width < 480 ? -140 : -160)
+          .xAxisTitleOffsetX(width < 480 ? -140 : -180)
           .yAxisTitleOffsetX(width < 480 ? -15 : -45)
           .yAxisTitle("Area (in km²)")
           .binLabels(true)
@@ -81,12 +129,12 @@
           })
           .initialAnimation("rollout")
           .binLabelOffsetX(0)
-          .chartOffsetY(-70)
-          .chartOffsetX(40)
+          .chartOffsetY(width < 480 ? 20 : -50)
+          .chartOffsetX(width < 480 ? 40 : 40)
           .legend(true)
           .legendTitle("Population per 25 km²")
           .legendHeight(200)
-          .legendFontSize(16)
+          .legendFontSize(15)
           .animate();
       });
     </script>
