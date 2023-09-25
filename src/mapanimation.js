@@ -48,7 +48,10 @@ export function animation() {
   out.xAxisTitle_ = null;
   out.yAxisTitle_ = null;
   out.xAxisTitleOffsetX_ = -250;
+  out.xAxisTitleOffsetY_ = 20
+  
   out.yAxisTitleOffsetX_ = -50;
+  
   out.binLabelOffsetX_ = 0;
   out.binLabelOffsetY_ = -30;
   out.chartOffsetX_ = 60;
@@ -910,7 +913,7 @@ export function animation() {
    * @return {HTMLDivElement}
    */
   function createChartTitleX() {
-    let labelY = out.height_ + out.chartOffsetY_ + 40;
+    let labelY = out.height_ + out.chartOffsetY_ + out.xAxisTitleOffsetY_;
     let labelX = out.width_ / 2 + out.xAxisTitleOffsetX_;
 
     //canvas implementation
