@@ -35,6 +35,7 @@ export function animation() {
   out.colors_ = ["#005cff", "#55e238", "#ebff0a", "#ff0f00"];
   out.thresholds_ = [1, 100, 1000, 10000];
   out.projectionFunction_ = null;
+  out.endOfLayoutFunction_ = null; //fires when layout transition finishes
   out.backgroundColor_ = [1, 1, 1, 1];
   out.mapPadding_ = 50; //padding to animation frame in pixels
   out.legend_ = true;
@@ -453,17 +454,20 @@ export function animation() {
         recording = true;
       }
 
+      // generic delay between transitions or specific delay per transition
       let delay = Array.isArray(out.delayAtEnd_)
         ? out.delayAtEnd_[currentLayout] / 1000
         : out.delayAtEnd_ / 1000;
-      //console.log(delay);
 
       // if we have exceeded the maximum duration, move on to the next animation
       if (time - startTime > out.maxDuration / 1000 + delay) {
-        /*     console.log('done animating, moving to next layout'); */
+
 
         frameLoop.cancel();
         currentLayout = (currentLayout + 1) % layouts.length;
+
+        /*     console.log('done animating, moving to next layout'); */
+        if (out.endOfLayoutFunction_) out.endOfLayoutFunction_(currentLayout);
 
         // when restarting at the beginning, come back from the middle again
         /*       if (currentLayout === 0) {

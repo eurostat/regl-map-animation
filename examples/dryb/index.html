@@ -64,13 +64,15 @@
     <div class="wrapper">
       <!-- TITLE -->
       <div class="animation-titles">
-        <h4 class="title">Population density, 2021</h4>
-        <h5 class="subtitle">(number of inhabitants per 25 km²)</h5>
+        <h4 class="title" id="animation-title">Population density, 2021</h4>
+        <h5 class="subtitle" id="animation-subtitle">
+          (number of inhabitants per 25 km²)
+        </h5>
       </div>
       <div id="animation-container" style="aspect-ratio: 4 / 3"></div>
     </div>
 
-    <script src="../../build/reglmapanimation.js"></script>
+    <script src="./reglmapanimation.min.js"></script>
     <script src="./d3.min.js"></script>
     <script>
       d3.csv("./pop_5000m.csv", (d) => {
@@ -93,6 +95,11 @@
         let containerBbox = container.getBoundingClientRect();
 
         //animation
+        let duration = 1000;
+        let delayAtEnd = [500, 4000, 6000];
+        let title = document.getElementById("animation-title");
+        let subtitle = document.getElementById("animation-subtitle");
+
         ReglMapAnimation.animation()
           .container(container)
           .pointData(sortedPointData)
@@ -114,8 +121,8 @@
             "#17256b",
           ])
           .thresholds([0, 1, 500, 2500, 12500, 62500])
-          .duration(1000)
-          .delayAtEnd([500, 4000, 6000]) // for each transition (logo > map > chart), specify the delay at the end
+          .duration(duration)
+          .delayAtEnd(delayAtEnd) // for each transition (logo > map > chart), specify the delay at the end
           .xAxisTitle("Population (number of inhabitants per 25 km²)")
           .xAxisTitleOffsetX(width < 480 ? -140 : -180)
           .yAxisTitleOffsetX(width < 480 ? -15 : -45)
@@ -135,6 +142,18 @@
           .legendTitle("Population per 25 km²")
           .legendHeight(200)
           .legendFontSize(15)
+          .endOfLayoutFunction((layoutIndex) => {
+            // update titles dynamically
+            if (layoutIndex == 0 || layoutIndex == 1) {
+              // end of bar chart
+              title.innerHTML = "Population density, 2021";
+              subtitle.innerHTML = "(number of inhabitants per 25 km²)";
+            } else {
+              // end of map
+              title.innerHTML = "EU area by population density, 2021";
+              subtitle.innerHTML = "(km²)";
+            }
+          })
           .animate();
       });
     </script>
