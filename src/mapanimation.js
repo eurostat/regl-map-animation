@@ -6,8 +6,8 @@ import * as Legend from "./legend";
 import * as Utils from "./utils";
 
 let regl = null;
-let recording = false;
 let positionStart, positionEnd, colorStart, colorEnd, index;
+let isPaused = false;
 
 /**
  * Main function to use when creating a animation
@@ -49,10 +49,8 @@ export function animation() {
   out.xAxisTitle_ = null;
   out.yAxisTitle_ = null;
   out.xAxisTitleOffsetX_ = -250;
-  out.xAxisTitleOffsetY_ = 20
-  
+  out.xAxisTitleOffsetY_ = 20;
   out.yAxisTitleOffsetX_ = -50;
-  
   out.binLabelOffsetX_ = 0;
   out.binLabelOffsetY_ = -30;
   out.chartOffsetX_ = 60;
@@ -70,11 +68,7 @@ export function animation() {
       return "0";
     } else {
       if (nextBin) {
-        return (
-          Utils.formatStr(parseInt(bin.value)) +
-          " to " +
-          Utils.formatStr(parseInt(nextBin.value))
-        );
+        return Utils.formatStr(parseInt(bin.value)) + " to " + Utils.formatStr(parseInt(nextBin.value));
       } else {
         return "≥ " + Utils.formatStr(parseInt(bin.value));
       }
@@ -86,11 +80,7 @@ export function animation() {
       if (d.stop == 0) {
         return Utils.formatStr(d.stop);
       }
-      return (
-        Utils.formatStr(d.stop) +
-        " to " +
-        Utils.formatStr(out.thresholds_[d.index + 1])
-      );
+      return Utils.formatStr(d.stop) + " to " + Utils.formatStr(out.thresholds_[d.index + 1]);
     } else {
       //is first
       return "≥ " + Utils.formatStr(d.stop);
@@ -118,6 +108,14 @@ export function animation() {
         return out;
       };
     })();
+
+  //pause/play
+  out.pause = function () {
+    pauseAnimation();
+  };
+  out.play = function () {
+    playAnimation();
+  };
 
   out.animate = function () {
     //clear regl
@@ -394,49 +392,51 @@ export function animation() {
     return drawPoints;
   }
 
-  // function to start animation loop (note: time is in seconds)
+  let isPaused = false;
+  let frameLoop = null;
+  let startTime = null;
   let loopsCompleted = 0;
+
+  // Function to start or resume the animation loop
   function animationLoop(layouts, points) {
-    /*  console.log('animating with new layout'); */
-    // make previous end the new beginning
+    if (isPaused) return; // Exit early if paused
+
+    // Make previous end the new beginning
     points.forEach((d) => {
       d.sx = d.tx;
       d.sy = d.ty;
       d.colorStart = d.colorEnd;
     });
 
-    // layout points
+    // Layout points
     layouts[currentLayout](points);
 
-    // copy layout x y to end positions
+    // Copy layout x y to end positions
     points.forEach((d, i) => {
       d.tx = d.x;
       d.ty = d.y;
-      // d.colorEnd = colorScale(i / points.length)
       d.colorEnd = d.color;
     });
 
-    // create the regl function with the new start and end points
+    // Create the regl function with the new start and end points
     const drawPoints = createDrawPoints(points);
 
-    // start an animation loop
-    let startTime = null; // in seconds
-    const frameLoop = regl.frame(({ time }) => {
-      // keep track of start time so we can get time elapsed
-      // this is important since time doesn't reset when starting new animations
+    // Start the animation loop
+    startTime = null; // Reset start time
+    frameLoop = regl.frame(({ time }) => {
+      if (isPaused) return; // Exit early if paused
+
       if (startTime === null) {
         startTime = time;
       }
 
-      // clear the buffer
+      // Clear the buffer
       regl.clear({
-        // background color (black)
         color: out.backgroundColor_,
         depth: 1,
       });
 
-      // draw the points using our created regl func
-      // note that the arguments are available via `regl.prop`.
+      // Draw the points using our created regl function
       drawPoints({
         pointWidth: out.pointWidth_,
         stageWidth: out.width_,
@@ -447,61 +447,61 @@ export function animation() {
         startTime,
       });
 
-      //run user-defined render function
+      // Run user-defined render function
       if (out.frameFunction_) {
         let canvas = out.container_;
         out.frameFunction_(canvas);
-        recording = true;
       }
 
-      // generic delay between transitions or specific delay per transition
-      let delay = Array.isArray(out.delayAtEnd_)
-        ? out.delayAtEnd_[currentLayout] / 1000
-        : out.delayAtEnd_ / 1000;
+      // Generic delay between transitions or specific delay per transition
+      let delay = Array.isArray(out.delayAtEnd_) ? out.delayAtEnd_[currentLayout] / 1000 : out.delayAtEnd_ / 1000;
 
-      // if we have exceeded the maximum duration, move on to the next animation
+      // If we have exceeded the maximum duration, move on to the next animation
       if (time - startTime > out.maxDuration / 1000 + delay) {
-
-
-        frameLoop.cancel();
+        frameLoop = null;
         currentLayout = (currentLayout + 1) % layouts.length;
 
-        /*     console.log('done animating, moving to next layout'); */
-        if (out.endOfLayoutFunction_) out.endOfLayoutFunction_(currentLayout);
-
-        // when restarting at the beginning, come back from the middle again
-        /*       if (currentLayout === 0) {
-        points.forEach((d, i) => {
-          d.tx = out.width_ / 2;
-          d.ty = out.height_ / 2;
-          d.colorEnd = [0, 0, 0];
-        });
-      } */
+        if (!isPaused && out.endOfLayoutFunction_) {
+          out.endOfLayoutFunction_(currentLayout);
+        }
 
         loopsCompleted++;
 
-        //endFunction & stop animation
+        // End function and stop animation
         if (loopsCompleted === 3) {
           if (out.endFunction_) {
-            if (out.endFunction_) {
-              let canvas = out.container_;
-              out.endFunction_(canvas);
-              recording = false;
-              frameLoop.cancel();
-              regl.destroy();
-              animationLoop = function () {
-                return;
-              };
-            }
-          } else {
-            animationLoop(layouts, points);
+            let canvas = out.container_;
+            out.endFunction_(canvas);
+            frameLoop = null;
+            regl.destroy();
+            // Disable the animation function
+            animationLoop = function () {
+              return;
+            };
           }
         } else {
-          animationLoop(layouts, points);
+          // Restart the animation loop
+          if (!isPaused) {
+            animationLoop(layouts, points);
+          }
         }
       }
     });
-    return out;
+  }
+
+  // Function to pause animation
+  function pauseAnimation() {
+    isPaused = true;
+  }
+
+  // Function to play (or resume) animation
+  function playAnimation() {
+    if (isPaused) {
+      isPaused = false;
+      if (frameLoop === null) {
+        animationLoop(layouts, points); // Restart the animation loop if not already running
+      }
+    }
   }
 
   //LAYOUTS
@@ -515,9 +515,7 @@ export function animation() {
     hideLabels();
 
     // logo points and data points need to be the same amount so we use d3 scale
-    let logoIndexScale = scaleLinear()
-      .domain([0, points.length])
-      .range([0, logoData.length]);
+    let logoIndexScale = scaleLinear().domain([0, points.length]).range([0, logoData.length]);
 
     // center to container using d3scale
     let logoXScale, logoYScale;
@@ -527,30 +525,18 @@ export function animation() {
       let screenCenter = { x: out.width_ / 2, y: out.height_ / 2 };
       logoXScale = scaleLinear()
         .domain(xExtent)
-        .range([
-          screenCenter.x - out.logoWidth_,
-          screenCenter.x + out.logoWidth_,
-        ]);
+        .range([screenCenter.x - out.logoWidth_, screenCenter.x + out.logoWidth_]);
       logoYScale = scaleLinear()
         .domain(yExtent)
-        .range([
-          screenCenter.y - out.logoHeight_,
-          screenCenter.y + out.logoHeight_,
-        ]);
+        .range([screenCenter.y - out.logoHeight_, screenCenter.y + out.logoHeight_]);
     }
 
     points.forEach((point, i) => {
       let logoIndex = Math.floor(logoIndexScale(i)); // e.g. for when logoData has less items than pointsData
-      let pointColor = logoData[logoIndex].color
-        ? logoData[logoIndex].color
-        : out.logoColor_;
+      let pointColor = logoData[logoIndex].color ? logoData[logoIndex].color : out.logoColor_;
       let glColor = toVectorColor(pointColor);
-      point.x = out.centerLogo_
-        ? logoXScale(logoData[logoIndex].x)
-        : logoData[logoIndex].x;
-      point.y = out.centerLogo_
-        ? logoYScale(logoData[logoIndex].y)
-        : logoData[logoIndex].y;
+      point.x = out.centerLogo_ ? logoXScale(logoData[logoIndex].x) : logoData[logoIndex].x;
+      point.y = out.centerLogo_ ? logoYScale(logoData[logoIndex].y) : logoData[logoIndex].y;
       point.color = glColor;
     });
 
@@ -757,10 +743,7 @@ export function animation() {
       if (out.binWidth_) {
         return out.binWidth_;
       } else {
-        return (
-          (containerWidth - out.binMargin_ * out.thresholds_.length) /
-          out.thresholds_.length
-        );
+        return (containerWidth - out.binMargin_ * out.thresholds_.length) / out.thresholds_.length;
       }
 
       // return (
@@ -861,11 +844,7 @@ export function animation() {
    */
   function createLabelY(bin) {
     let labelY = bin.maxY + out.binLabelOffsetY_;
-    let labelX =
-      bin.binStart +
-      bin.binWidth / 2 +
-      out.binLabelOffsetX_ +
-      out.chartOffsetX_;
+    let labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + out.chartOffsetX_;
 
     //html labels
     let div = document.createElement("div");
@@ -889,18 +868,9 @@ export function animation() {
     let labelX;
     if (nextBin) {
       // bar minX + bar width/2 + offsets
-      labelX =
-        bin.binStart +
-        bin.binWidth / 2 +
-        out.binLabelOffsetX_ +
-        out.chartOffsetX_;
+      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + out.chartOffsetX_;
     } else {
-      labelX =
-        bin.binStart +
-        bin.binWidth / 2 +
-        out.binLabelOffsetX_ +
-        10 +
-        out.chartOffsetX_;
+      labelX = bin.binStart + bin.binWidth / 2 + out.binLabelOffsetX_ + 10 + out.chartOffsetX_;
     }
     //html labels
     let div = document.createElement("div");

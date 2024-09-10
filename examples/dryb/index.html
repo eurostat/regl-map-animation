@@ -50,29 +50,19 @@
     </style>
   </head>
 
-  <body
-    style="
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: auto;
-      vertical-align: middle;
-      height: 100vh;
-      width: 100vw;
-    "
-  >
+  <body style="display: flex; align-items: center; justify-content: center; margin: auto; vertical-align: middle; height: 100vh; width: 100vw">
     <div class="wrapper">
       <!-- TITLE -->
       <div class="animation-titles">
         <h4 class="title" id="animation-title">Population density, 2021</h4>
-        <h5 class="subtitle" id="animation-subtitle">
-          (number of inhabitants per 25 km²)
-        </h5>
+        <h5 class="subtitle" id="animation-subtitle">(number of inhabitants per 25 km²)</h5>
       </div>
       <div id="animation-container" style="aspect-ratio: 4 / 3"></div>
+      <button id="playBtn">Play</button>
+      <button id="pauseBtn">Pause</button>
     </div>
 
-    <script src="./reglmapanimation.min.js"></script>
+    <script src="../../build/reglmapanimation.js"></script>
     <script src="./d3.min.js"></script>
     <script>
       d3.csv("./pop_5000m.csv", (d) => {
@@ -100,7 +90,7 @@
         let title = document.getElementById("animation-title");
         let subtitle = document.getElementById("animation-subtitle");
 
-        ReglMapAnimation.animation()
+        let animation = ReglMapAnimation.animation()
           .container(container)
           .pointData(sortedPointData)
           //.logoData(logoData)
@@ -112,14 +102,7 @@
           .mapPadding(0)
           .width(width)
           .height(containerBbox.height)
-          .colors([
-            "#ffeb99",
-            "#c7e9b4",
-            "#7fcdbb",
-            "#41b6c4",
-            "#104f99",
-            "#17256b",
-          ])
+          .colors(["#ffeb99", "#c7e9b4", "#7fcdbb", "#41b6c4", "#104f99", "#17256b"])
           .thresholds([0, 1, 500, 2500, 12500, 62500])
           .duration(duration)
           .delayAtEnd(delayAtEnd) // for each transition (logo > map > chart), specify the delay at the end
@@ -155,6 +138,9 @@
             }
           })
           .animate();
+
+        document.getElementById("playBtn").addEventListener("click", () => animation.play());
+        document.getElementById("pauseBtn").addEventListener("click", () => animation.pause());
       });
     </script>
   </body>
